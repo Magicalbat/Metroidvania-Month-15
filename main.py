@@ -23,7 +23,8 @@ def main():
 
         win.fill((200,200,200))
 
-        
+        mousePos = pygame.math.Vector2(pygame.mouse.get_pos())
+        pygame.draw.circle(win, (0,245,255), mousePos, 25)
 
         pygame.display.update()
 
