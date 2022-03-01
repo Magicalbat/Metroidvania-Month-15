@@ -3,6 +3,7 @@ from pygame.math import Vector2
 
 from src.common import loadSpriteSheet
 from src.tilemap import Tilemap
+from src.entity import Entity
 
 def main():
     pygame.init()
@@ -21,6 +22,7 @@ def main():
     tilemap = Tilemap(16, images)
     tilemap.loadLevel("res/levels/testlevel.json")
 
+    e = Entity(32,32,12,20)
     pos = Vector2(0,0)
     scroll = Vector2(0,0)
 
@@ -47,6 +49,7 @@ def main():
         tilemap.draw(win, scroll)
 
         pygame.draw.circle(win, (0,245,255), pos-scroll, 5)
+        e.draw(win, scroll)
 
         pygame.display.update()
 
