@@ -10,6 +10,11 @@ class Entity:
 
         self.vel = Vector2(0, 0)
 
+        # UP RIGHT DOWN LEFT
+        self.collisionDir = 0b0000
+
+        self.gravity = 5
+
         self.applyGravity = False
         self.applyVelocity = False
         self.applyCollision = False
@@ -24,6 +29,49 @@ class Entity:
     @property
     def rect(self):
         return pygame.Rect(self.clampedPos, (self.width, self.height))
+
+    @property
+    def center(self):
+        return self.pos + Vector2(self.width * 0.5, self.height * 0.5)
+
+    def update(self, delta, tilemap=None, colRects=None):
+        if self.applyGravity:
+            self.vel.y += self.gravity
+        if self.applyCollision:
+            if colRects is None:    colRects = []
+            if tilemap is not None:
+                tilemap.getColRects(self.pos, self.width, self.height, self.vel * delta, colRects)
+
+            self.collisionDir = 0b0000
+            
+            self.pos.x += self.vel.x * delta
+            indices = self.rect.collidelistall(colRects)
+
+            for i in indices:
+                if self.vel.x > 0:
+                    self.pos.x = colRects[i].x - self.width
+                    self.vel.x = 0
+                    self.collisionDir |= 0b0100
+                elif self.vel.x < 0:
+                    self.pos.x = colRects[i].right
+                    self.vel.x = 0
+                    self.collisionDir |= 0b0001
+
+            self.pos.y += self.vel.y * delta
+            indices = self.rect.collidelistall(colRects)
+
+            for i in indices:
+                if self.vel.y > 0:
+                    self.pos.y = colRects[i].y - self.height
+                    self.vel.y = 0
+                    self.collisionDir |= 0b0010
+                elif self.vel.y < 0:
+                    self.pos.y = colRects[i].bottom
+                    self.vel.y = 0
+                    self.collisionDir |= 0b1000
+            
+        elif self.applyVelocity:
+            self.pos += self.vel * delta
 
     def draw(self, win, scroll):
         pygame.draw.rect(win, (255,0,0), pygame.Rect(self.clampedPos - scroll, (self.width, self.height)), 1)

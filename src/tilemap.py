@@ -11,23 +11,23 @@ class Tilemap:
         self.chunks = {}
         self.chunkSize = chunkSize
 
-    def getColRects(self, rect, vel):
+    def getColRects(self, pos, width, height, vel, colRects=None):
         toChunkPos = lambda p:int(p/self.tileSize/self.chunkSize)
         
         testPointsX = (
-            rect.x,
-            rect.right,
-            rect.x + vel.x,
-            rect.right + vel.x
+            pos.x,
+            pos.x + width,
+            pos.x + vel.x,
+            pos.x + width + vel.x
         )
         minX = toChunkPos(min(testPointsX))
         maxX = toChunkPos(max(testPointsX))
 
         testPointsY = (
-            rect.y,
-            rect.bottom,
-            rect.y + vel.y,
-            rect.bottom + vel.y
+            pos.y,
+            pos.y + height,
+            pos.y + vel.y,
+            pos.y + height + vel.y
         )
         minY = toChunkPos(min(testPointsY))
         maxY = toChunkPos(max(testPointsY))
@@ -37,11 +37,11 @@ class Tilemap:
             (maxX, minY), (maxX, maxY)
         }
 
-        out = []
+        if colRects is None:    colRects = []
         for pos in testChunkPositions:
             if pos in self.chunks:
-                out += self.chunks[pos]
-        return out
+                colRects += self.chunks[pos]
+        return colRects 
         
     def draw(self, win, scroll=None):
         if scroll is None:    scroll = Vector2(0, 0)
@@ -54,6 +54,10 @@ class Tilemap:
         if scroll is None:    scroll = Vector2(0, 0)
         cols = ((255,0,0), (0,255,0), (0,0,255))
         for pos, rects in self.chunks.items():
+            pygame.draw.rect(win, (255,255,255), \
+                (pos[0] * self.tileSize * self.chunkSize - scroll.x,\
+                 pos[1] * self.tileSize * self.chunkSize - scroll.y,\
+                 self.tileSize * self.chunkSize, self.tileSize * self.chunkSize), 1)
             for i, rect in enumerate(rects):
                 pygame.draw.rect(win, cols[i%len(cols)], \
                 (rect.x - scroll.x, rect.y - scroll.y, \
@@ -76,3 +80,6 @@ class Tilemap:
                 tempRects.append(pygame.Rect(rect))
             pStr = pos.split(';')
             self.chunks[(int(pStr[0]), int(pStr[1]))] = tempRects
+            
+        if "extraData" in data:
+            return data["extraData"]

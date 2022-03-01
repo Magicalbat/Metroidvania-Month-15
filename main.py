@@ -20,35 +20,39 @@ def main():
 
     images = loadSpriteSheet("res/temptiles.png", (16,16), (3,1), (1,1), 3, (0,0,0))
     tilemap = Tilemap(16, images)
-    tilemap.loadLevel("res/levels/testlevel.json")
-
-    e = Entity(32,32,12,20)
-    pos = Vector2(0,0)
+    extraData = tilemap.loadLevel("res/levels/testlevel.json")
+    
+    e = Entity(40, 40, 12, 20)
+    e.applyGravity = True
+    e.applyCollision = True
+    e.pos.x = extraData["PlayerSpawn"][0][0]
+    e.pos.y = extraData["PlayerSpawn"][0][1] - e.height
+    
     scroll = Vector2(0,0)
 
     running = True
     while running:
         clock.tick(fps)
         delta = clock.get_time() / 1000
-
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
         keys = pygame.key.get_pressed()
-        speed = 50
-        if keys[pygame.K_w]:    pos.y -= speed * delta
-        if keys[pygame.K_s]:    pos.y += speed * delta
-        if keys[pygame.K_d]:    pos.x += speed * delta
-        if keys[pygame.K_a]:    pos.x -= speed * delta
-
-        scroll += ((pos-Vector2(width/2, height/2)) - scroll) / 10
+        e.vel.x = 0
+        if keys[pygame.K_d]:    e.vel.x =  50
+        if keys[pygame.K_a]:    e.vel.x = -50
+            
+        e.update(delta, tilemap)
+            
+        scroll += ((e.center-Vector2(width/2, height/2)) - scroll) / 10
 
         win.fill((200,200,200))
 
         tilemap.draw(win, scroll)
+        tilemap.drawCollision(win, scroll)
 
-        pygame.draw.circle(win, (0,245,255), pos-scroll, 5)
         e.draw(win, scroll)
 
         pygame.display.update()
