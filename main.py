@@ -3,12 +3,13 @@ from pygame.math import Vector2
 
 from src.common import loadSpriteSheet
 from src.tilemap import Tilemap
-from src.entity import Entity
+
+from src.entities.player import Player
 
 def main():
     pygame.init()
 
-    pygame.event.set_allowed([pygame.QUIT])
+    pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
 
     width = 320
     height = 180
@@ -22,11 +23,9 @@ def main():
     tilemap = Tilemap(16, images)
     extraData = tilemap.loadLevel("res/levels/testlevel.json")
     
-    e = Entity(40, 40, 12, 20)
-    e.applyGravity = True
-    e.applyCollision = True
-    e.pos.x = extraData["PlayerSpawn"][0][0]
-    e.pos.y = extraData["PlayerSpawn"][0][1] - e.height
+    p = Player(40, 40, 12, 20)
+    p.pos.x = extraData["PlayerSpawn"][0][0]
+    p.pos.y = extraData["PlayerSpawn"][0][1] - p.height
     
     scroll = Vector2(0,0)
 
@@ -38,22 +37,19 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                p.keydown(event)
 
-        keys = pygame.key.get_pressed()
-        e.vel.x = 0
-        if keys[pygame.K_d]:    e.vel.x =  50
-        if keys[pygame.K_a]:    e.vel.x = -50
+        p.update(delta, tilemap)
             
-        e.update(delta, tilemap)
-            
-        scroll += ((e.center-Vector2(width/2, height/2)) - scroll) / 10
+        scroll += ((p.center-Vector2(width/2, height/2)) - scroll) / 10
 
         win.fill((200,200,200))
 
         tilemap.draw(win, scroll)
-        tilemap.drawCollision(win, scroll)
+        #tilemap.drawCollision(win, scroll)
 
-        e.draw(win, scroll)
+        p.draw(win, scroll)
 
         pygame.display.update()
 
