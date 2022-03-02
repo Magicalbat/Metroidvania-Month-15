@@ -6,7 +6,7 @@ from src.entities.player import Player
 from src.tilemap import Tilemap
 from src.common import *
 
-class TestScreen(GameScreen):
+class Level(GameScreen):
     def __init__(self):
         tileImgs = loadSpriteSheet("res/temptiles.png", (16,16), (3,1), (1,1), 3, (0,0,0))
         self.tilemap = Tilemap(16, tileImgs)
@@ -20,10 +20,13 @@ class TestScreen(GameScreen):
         super().setup(screenManager)
 
         self.player = Player(self.playerSpawn, 12, 20)
+        self.scroll = Vector2(0, 0)
 
-    def draw(self, win):
-        self.tilemap.draw(win, Vector2(0, 0))
-        self.player.draw(win, Vector2(0, 0))
+    def draw(self, win : pygame.Surface):
+        self.tilemap.draw(win, self.scroll)
+        self.player.draw(win, self.scroll)
+
+        self.scroll += ((self.player.pos - Vector2(win.get_size())*0.5) - self.scroll) / 10
 
     def update(self, delta):
         self.player.update(delta, self.tilemap)

@@ -1,13 +1,8 @@
 import pygame
 from pygame.math import Vector2
 
-from src.common import loadSpriteSheet
-from src.tilemap import Tilemap
-
-from src.entities.player import Player
-
 from src.screens.screenmanager import ScreenManager
-from src.screens.testscreen import TestScreen
+from src.screens.level import Level 
 
 def main():
     pygame.init()
@@ -22,15 +17,7 @@ def main():
     clock = pygame.time.Clock()
     fps = 60
 
-    #images = loadSpriteSheet("res/temptiles.png", (16,16), (3,1), (1,1), 3, (0,0,0))
-    #tilemap = Tilemap(16, images)
-    #extraData = tilemap.loadLevel("res/levels/testlevel.json")
-    
-    #p = Player(40, 40, 12, 20)
-    #p.pos.x = extraData["PlayerSpawn"][0][0]
-    #p.pos.y = extraData["PlayerSpawn"][0][1] - p.height
-
-    screenManager = ScreenManager(TestScreen())
+    screenManager = ScreenManager(Level())
     
     running = True
     while running:
@@ -43,20 +30,11 @@ def main():
             if event.type == pygame.KEYDOWN:
                 screenManager.keydown(event)
 
-        #p.update(delta, tilemap)
-
         screenManager.update(delta)
-            
-        #scroll += ((p.center-Vector2(width/2, height/2)) - scroll) / 10
 
         win.fill((200,200,200))
 
         screenManager.draw(win)
-
-        #tilemap.draw(win, scroll)
-        #tilemap.drawCollision(win, scroll)
-
-        #p.draw(win, scroll)
 
         pygame.display.update()
 
