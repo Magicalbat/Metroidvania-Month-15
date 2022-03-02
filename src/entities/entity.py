@@ -4,7 +4,12 @@ from pygame.math import Vector2
 import math
 
 class Entity:
-    def __init__(self, x, y, w, h):
+    def __init__(self, *args):
+        if len(args) == 4 or len(args) == 1:    x, y, w, h = args
+        elif len(args) == 3:    (x, y), w, h = args
+        elif len(args) == 2:    (x, y), (w, h) = args
+        else:    print(f"Invalid args: {args}")
+            
         self.pos = Vector2(x, y)
         self.width, self.height = w, h
 

@@ -4,8 +4,8 @@ from pygame.math import Vector2
 from src.entities.entity import Entity
 
 class Player(Entity):
-    def __init__(self, x, y, w, h):
-        super().__init__(x, y, w, h)
+    def __init__(self, *args):
+        super().__init__(*args)
 
         self.speed = 16*5
         self.jumpHeight = 150

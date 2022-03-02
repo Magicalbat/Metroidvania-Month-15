@@ -6,6 +6,9 @@ from src.tilemap import Tilemap
 
 from src.entities.player import Player
 
+from src.screens.screenmanager import ScreenManager
+from src.screens.testscreen import TestScreen
+
 def main():
     pygame.init()
 
@@ -19,16 +22,16 @@ def main():
     clock = pygame.time.Clock()
     fps = 60
 
-    images = loadSpriteSheet("res/temptiles.png", (16,16), (3,1), (1,1), 3, (0,0,0))
-    tilemap = Tilemap(16, images)
-    extraData = tilemap.loadLevel("res/levels/testlevel.json")
+    #images = loadSpriteSheet("res/temptiles.png", (16,16), (3,1), (1,1), 3, (0,0,0))
+    #tilemap = Tilemap(16, images)
+    #extraData = tilemap.loadLevel("res/levels/testlevel.json")
     
-    p = Player(40, 40, 12, 20)
-    p.pos.x = extraData["PlayerSpawn"][0][0]
-    p.pos.y = extraData["PlayerSpawn"][0][1] - p.height
-    
-    scroll = Vector2(0,0)
+    #p = Player(40, 40, 12, 20)
+    #p.pos.x = extraData["PlayerSpawn"][0][0]
+    #p.pos.y = extraData["PlayerSpawn"][0][1] - p.height
 
+    screenManager = ScreenManager(TestScreen())
+    
     running = True
     while running:
         clock.tick(fps)
@@ -38,18 +41,22 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                p.keydown(event)
+                screenManager.keydown(event)
 
-        p.update(delta, tilemap)
+        #p.update(delta, tilemap)
+
+        screenManager.update(delta)
             
-        scroll += ((p.center-Vector2(width/2, height/2)) - scroll) / 10
+        #scroll += ((p.center-Vector2(width/2, height/2)) - scroll) / 10
 
         win.fill((200,200,200))
 
-        tilemap.draw(win, scroll)
+        screenManager.draw(win)
+
+        #tilemap.draw(win, scroll)
         #tilemap.drawCollision(win, scroll)
 
-        p.draw(win, scroll)
+        #p.draw(win, scroll)
 
         pygame.display.update()
 
