@@ -49,8 +49,8 @@ class Level(GameScreen):
 
         col = self.player.rect.collidelist(self.cameraTriggerRects)
         if col > -1:    self.targetIndex = col#self.cameraBounds = self.cameraTriggers[col]
-        self.cameraBounds[0] = self.cameraBounds[0].lerp(self.cameraTriggerVectors[self.targetIndex][0], 0.1)
-        self.cameraBounds[1] = self.cameraBounds[1].lerp(self.cameraTriggerVectors[self.targetIndex][1], 0.1)
+        self.cameraBounds[0] = self.cameraBounds[0].lerp(self.cameraTriggerVectors[self.targetIndex][0], 0.075)
+        self.cameraBounds[1] = self.cameraBounds[1].lerp(self.cameraTriggerVectors[self.targetIndex][1], 0.075)
         
         self.scroll.x = min(self.cameraBounds[1].x-winDim[0], self.scroll.x)
         self.scroll.x = max(self.cameraBounds[0].x, self.scroll.x)
@@ -59,3 +59,6 @@ class Level(GameScreen):
         
     def keydown(self, event):
         self.player.keydown(event)
+
+    def keyup(self, event):
+        self.player.keyup(event)

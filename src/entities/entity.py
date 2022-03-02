@@ -18,7 +18,7 @@ class Entity:
         # UP RIGHT DOWN LEFT
         self.collisionDir = 0b0000
 
-        self.gravity = 5
+        self.gravity = 430
 
         self.applyGravity = False
         self.applyVelocity = False
@@ -41,7 +41,7 @@ class Entity:
 
     def update(self, delta, tilemap=None, colRects=None):
         if self.applyGravity:
-            self.vel.y += self.gravity
+            self.vel.y += self.gravity * delta
         if self.applyCollision:
             if colRects is None:    colRects = []
             if tilemap is not None:

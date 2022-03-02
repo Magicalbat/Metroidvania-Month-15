@@ -29,6 +29,8 @@ def main():
                 running = False
             if event.type == pygame.KEYDOWN:
                 screenManager.keydown(event)
+            if event.type == pygame.KEYUP:
+                screenManager.keyup(event)
 
         screenManager.update(delta)
 

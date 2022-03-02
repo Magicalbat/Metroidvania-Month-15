@@ -5,6 +5,7 @@ class GameScreen:
     def draw(self, win):    pass
     def update(self, delta):    pass
     def keydown(self, event):    pass
+    def keyup(self, event):    pass
 
 class ScreenManager:
     def __init__(self, startScreen):
@@ -17,3 +18,5 @@ class ScreenManager:
         self.curScreen.update(delta)
     def keydown(self, event):
         self.curScreen.keydown(event)
+    def keyup(self, event):
+        self.curScreen.keyup(event)
