@@ -11,17 +11,28 @@ class Tilemap:
         self.chunks = {}
         self.chunkSize = chunkSize
 
+    def toChunkScale(self, p):
+        return int(p/self.tileSize/self.chunkSize)
+
+    def toChunkPos(self, p):
+        return (self.toChunkScale(p[0]), self.toChunkScale(p[1]))
+
+    def collidePoint(self, p:Vector2):
+        cp = self.toChunkPos(p)
+        if cp in self.chunks:
+            for rect in self.chunks[cp]:
+                if rect.collidepoint(p):    return True
+        return False
+    
     def getColRects(self, pos, width, height, vel, colRects=None):
-        toChunkPos = lambda p:int(p/self.tileSize/self.chunkSize)
-        
         testPointsX = (
             pos.x,
             pos.x + width,
             pos.x + vel.x,
             pos.x + width + vel.x
         )
-        minX = toChunkPos(min(testPointsX))
-        maxX = toChunkPos(max(testPointsX))
+        minX = self.toChunkScale(min(testPointsX))
+        maxX = self.toChunkScale(max(testPointsX))
 
         testPointsY = (
             pos.y,
@@ -29,8 +40,8 @@ class Tilemap:
             pos.y + vel.y,
             pos.y + height + vel.y
         )
-        minY = toChunkPos(min(testPointsY))
-        maxY = toChunkPos(max(testPointsY))
+        minY = self.toChunkScale(min(testPointsY))
+        maxY = self.toChunkScale(max(testPointsY))
 
         testChunkPositions = {
             (minX, minY), (minX, maxY),
