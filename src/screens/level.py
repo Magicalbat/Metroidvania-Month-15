@@ -1,18 +1,16 @@
 import pygame
 from pygame.math import Vector2
 
-import copy
-
 from src.screens.screenmanager import ScreenManager, GameScreen
 from src.entities.player import Player
 from src.tilemap import Tilemap
 from src.common import *
 
 class Level(GameScreen):
-    def __init__(self):
+    def __init__(self, filepath="res/levels/level0.json"):
         tileImgs = loadSpriteSheet("res/temptiles.png", (16,16), (3,1), (1,1), 3, (0,0,0))
         self.tilemap = Tilemap(16, tileImgs)
-        extraData = self.tilemap.loadLevel("res/levels/cameralevel.json")
+        extraData = self.tilemap.loadLevel(filepath)
 
         self.playerSpawn = Vector2(0,0)
         if "PlayerSpawn" in extraData:
@@ -26,6 +24,15 @@ class Level(GameScreen):
                 #r = pygame.Rect(p1, p2-p1)
                 self.cameraTriggerRects.append(pygame.Rect(p1, p2-p1))
                 self.cameraTriggerVectors.append((p1, p2))
+        
+        self.levelChangeRects = {}
+        i = 0
+        while True:
+            if f"{i} Level" in extraData:
+                if len(extraData[f"{i} Level"]):
+                    self.levelChangeRects[i] = pygame.Rect((extraData[f"{i} Level"][0], (16, 16)))
+            else:   break
+            i += 1
 
     def setup(self, screenManager):
         super().setup(screenManager)
@@ -43,6 +50,10 @@ class Level(GameScreen):
 
     def update(self, delta):
         self.player.update(delta, self.tilemap)
+        
+        for i, rect in self.levelChangeRects.items():
+            if rect.colliderect(self.player.rect):
+                self.screenManager.changeScreen(Level(f"res/levels/level{i}.json"))
 
     def updateCamera(self, winDim):
         self.scroll += ((self.player.pos - Vector2(winDim)*0.5) - self.scroll) / 10

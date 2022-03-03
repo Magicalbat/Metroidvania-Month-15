@@ -11,6 +11,11 @@ class ScreenManager:
     def __init__(self, startScreen):
         self.curScreen = startScreen
         self.curScreen.setup(self)
+    
+    def changeScreen(self, newScreen):
+        del self.curScreen
+        self.curScreen = newScreen
+        self.curScreen.setup(self)
         
     def draw(self, win):
         self.curScreen.draw(win)

@@ -17,7 +17,7 @@ def main():
     clock = pygame.time.Clock()
     fps = 60
 
-    screenManager = ScreenManager(Level())
+    screenManager = ScreenManager(Level("res/levels/cameratest.json"))
     
     running = True
     while running:
