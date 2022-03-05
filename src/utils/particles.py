@@ -53,7 +53,7 @@ class Particles:
                 self.col.pop(i)
 
     def emit(self, pos, amount, velRange):
-        num = amount if amount > 1 else random.random() > amount
+        num = amount if amount >= 1 else random.random() > amount
         for i in range(num):
             self.pos.append(pos + Vector2(random.uniform(*self.posRange[:2]), random.uniform(*self.posRange[2:])))
             self.siz.append(random.uniform(*self.sizeRange))

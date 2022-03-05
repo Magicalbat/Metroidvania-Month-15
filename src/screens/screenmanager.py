@@ -16,6 +16,9 @@ class ScreenManager:
         del self.curScreen
         self.curScreen = newScreen
         self.curScreen.setup(self)
+
+    def reloadCurrentScreen(self):
+        self.curScreen.setup(self)
         
     def draw(self, win):
         self.curScreen.draw(win)

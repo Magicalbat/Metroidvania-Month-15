@@ -3,6 +3,7 @@ from pygame.math import Vector2
 
 from src.screens.screenmanager import ScreenManager, GameScreen
 from src.entities.player import Player
+from src.entities.enemy import Enemy
 from src.utils.tilemap import Tilemap
 from src.utils.camera import Camera
 from src.utils.particles import Particles
@@ -41,46 +42,26 @@ class Level(GameScreen):
         super().setup(screenManager)
 
         self.player = Player(self.playerSpawn, 12, 20)
-        self.particles = Particles((5, 10), (-1, 1, -1, 1), speed=5, circle=True, accel=Vector2(0, self.player.gravity), collision=True, colors=[
-            (255,255,255), (225,225,225), (200,200,200), (150, 150, 150)
-        ])
-        #self.scroll = Vector2(0, 0)
-        #self.cameraBounds = [Vector2(0, 0), Vector2(0, 0)]
-        #self.targetIndex = 0
+        self.enemy = Enemy(50,50,12,16)
 
     def draw(self, win : pygame.Surface):
         self.camera.update(self.player, win.get_size())
-        #self.updateCamera(win.get_size())
         
         self.tilemap.draw(win, self.camera.scroll)
         self.player.draw(win, self.camera.scroll)
-
-        self.particles.draw(win, self.camera.scroll)
+        self.enemy.draw(win, self.camera.scroll)
 
     def update(self, delta):
         self.player.update(delta, self.tilemap)
+        self.enemy.update(delta, self.tilemap)
 
-        self.particles.update(delta, self.tilemap)
-        mousePos = Vector2(pygame.mouse.get_pos()) + self.camera.scroll
-        self.particles.emit(mousePos, 2, (-50, 50, -100, 0))
-        
+        if self.enemy.rect.colliderect(self.player.rect):
+            self.screenManager.reloadCurrentScreen()
+
         for i, rect in self.levelChangeRects.items():
             if rect.colliderect(self.player.rect):
                 self.screenManager.changeScreen(Level(f"res/levels/level{i}.json"))
 
-    def updateCamera(self, winDim):
-        self.scroll += ((self.player.center - Vector2(winDim)*0.5) - self.scroll) / 10
-
-        col = self.player.rect.collidelist(self.cameraTriggerRects)
-        if col > -1:    self.targetIndex = col#self.cameraBounds = self.cameraTriggers[col]
-        self.cameraBounds[0] = self.cameraBounds[0].lerp(self.cameraTriggerVectors[self.targetIndex][0], 0.075)
-        self.cameraBounds[1] = self.cameraBounds[1].lerp(self.cameraTriggerVectors[self.targetIndex][1], 0.075)
-        
-        self.scroll.x = min(self.cameraBounds[1].x-winDim[0], self.scroll.x)
-        self.scroll.x = max(self.cameraBounds[0].x, self.scroll.x)
-        self.scroll.y = min(self.cameraBounds[1].y-winDim[1], self.scroll.y)
-        self.scroll.y = max(self.cameraBounds[0].y, self.scroll.y)
-        
     def keydown(self, event):
         self.player.keydown(event)
 
