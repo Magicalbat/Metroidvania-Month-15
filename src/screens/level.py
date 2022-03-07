@@ -28,6 +28,10 @@ class Level(GameScreen):
                 cameraTriggerRects.append(pygame.Rect(p1, p2-p1))
                 cameraTriggerVectors.append((p1, p2))
         self.camera = Camera(cameraTriggerRects, cameraTriggerVectors)
+
+        self.enemyPositions = []
+        if "Enemies" in extraData:
+            for pos in extraData["Enemies"]:    self.enemyPositions.append(Vector2(pos))
         
         self.levelChangeRects = {}
         i = 0
@@ -42,20 +46,30 @@ class Level(GameScreen):
         super().setup(screenManager)
 
         self.player = Player(self.playerSpawn, 12, 20)
-        self.enemy = Enemy(50,50,12,16)
+        self.enemies = [Enemy(pos, 12, 16) for pos in self.enemyPositions]
 
     def draw(self, win : pygame.Surface):
         self.camera.update(self.player, win.get_size())
         
         self.tilemap.draw(win, self.camera.scroll)
         self.player.draw(win, self.camera.scroll)
-        self.enemy.draw(win, self.camera.scroll)
+        for enemy in self.enemies:
+            enemy.draw(win, self.camera.scroll)
+
+        for pos in self.enemyPositions:
+            pygame.draw.rect(win, (255,0,0), (pos-self.camera.scroll, (16,16)))
 
     def update(self, delta):
         self.player.update(delta, self.tilemap)
-        self.enemy.update(delta, self.tilemap)
 
-        if self.enemy.rect.colliderect(self.player.rect):
+        for enemy in self.enemies:
+            enemy.update(delta, self.tilemap)
+
+        for i in range(len(self.enemies))[::-1]:
+            if self.player.waterParticles.collideRect(self.enemies[i].rect):
+                self.enemies.pop(i)
+
+        if self.player.collideEntities(self.enemies):
             self.screenManager.reloadCurrentScreen()
 
         for i, rect in self.levelChangeRects.items():

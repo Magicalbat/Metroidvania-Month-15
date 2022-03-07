@@ -56,10 +56,12 @@ class Tilemap:
         
     def draw(self, win, scroll=None):
         if scroll is None:    scroll = Vector2(0, 0)
+        winDim = win.get_size()
         for layer in self.drawTiles:
             for tile in layer:
-                win.blit(self.imgs[tile[2]], \
-                    (tile[0] * self.tileSize - scroll.x, tile[1] * self.tileSize - scroll.y))
+                if tile[0] < winDim[0]+scroll.x and tile[0] > scroll.x-self.tileSize and \
+                   tile[1] < winDim[1]+scroll.y and tile[1] > scroll.y-self.tileSize:
+                    win.blit(self.imgs[tile[2]], (tile[0] - scroll.x, tile[1] - scroll.y))
 
     def drawCollision(self, win, scroll=None):
         if scroll is None:    scroll = Vector2(0, 0)
@@ -82,7 +84,7 @@ class Tilemap:
             for key, item in layer.items():
                 pStr = key.split(';')
                 x, y = int(pStr[0]), int(pStr[1])
-                tempLayer.append((x, y, item))
+                tempLayer.append((x*self.tileSize, y*self.tileSize, item))
             self.drawTiles.append(tempLayer)
 
         for pos, rects in data["chunks"].items():

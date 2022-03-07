@@ -59,3 +59,8 @@ class Particles:
             self.siz.append(random.uniform(*self.sizeRange))
             self.vel.append(Vector2(random.uniform(*velRange[:2]), random.uniform(*velRange[2:])))
             self.col.append(random.randrange(0, len(self.colors)))
+
+    def collideRect(self, rect):
+        for pos in self.pos:
+            if rect.collidepoint(pos):    return True
+        return False

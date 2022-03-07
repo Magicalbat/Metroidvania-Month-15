@@ -78,5 +78,11 @@ class Entity:
         elif self.applyVelocity:
             self.pos += self.vel * delta
 
+    def collideEntities(self, entities):
+        rect = self.rect
+        for e in entities:
+            if rect.colliderect(e.rect):    return True
+        return False
+
     def draw(self, win, scroll):
         pygame.draw.rect(win, (255,0,0), pygame.Rect(self.clampedPos - scroll, (self.width, self.height)), 1)
