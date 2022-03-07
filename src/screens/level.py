@@ -3,7 +3,7 @@ from pygame.math import Vector2
 
 from src.screens.screenmanager import ScreenManager, GameScreen
 from src.entities.player import Player
-from src.entities.enemy import Enemy
+from src.entities.enemy import GroundEnemy
 from src.utils.tilemap import Tilemap
 from src.utils.camera import Camera
 from src.utils.particles import Particles
@@ -21,8 +21,7 @@ class Level(GameScreen):
         super().setup(screenManager)
 
         self.player = Player(self.playerSpawn, 12, 20)
-        self.player.enableAcid()
-        self.enemies = [Enemy(pos, 12, 16) for pos in self.enemyPositions]
+        self.enemies = [GroundEnemy(pos, 12, 16) for pos in self.enemyPositions]
 
         self.screenRect = pygame.Rect(0,0,0,0)
 
@@ -60,6 +59,8 @@ class Level(GameScreen):
 
     def keydown(self, event):
         self.player.keydown(event)
+        if event.key == pygame.K_t:
+            self.player.enableAcid()
 
     def keyup(self, event):
         self.player.keyup(event)
