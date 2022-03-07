@@ -39,7 +39,7 @@ class Level(GameScreen):
         self.player.update(delta, self.tilemap, [enemy.rect for enemy in self.enemies if enemy.stunTimer > 0])
 
         for enemy in self.enemies:
-            enemy.update(delta, self.tilemap)
+            enemy.update(delta, self.player, self.tilemap)
 
         for i in range(len(self.enemies))[::-1]:
             if self.screenRect.colliderect(self.enemies[i].rect):

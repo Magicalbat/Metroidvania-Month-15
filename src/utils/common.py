@@ -24,3 +24,6 @@ def loadSpriteSheet(imgPath, spriteSize, dim, padding, count, colorKey=None):
                 return imgs
     
     return imgs
+
+def lerp(a, b, d):
+    return a * (1 - d) + b * d

@@ -31,6 +31,7 @@ class Player(Entity):
 
     def enableAcid(self):
         self.acid = True
+        self.waterParticles.clear()
         self.waterParticles.colors = [
             (0,255,0), (0,225,0), (0,220,100)
         ]

@@ -22,7 +22,7 @@ def main():
     running = True
     while running:
         clock.tick(fps)
-        delta = clock.get_time() / 1000
+        delta = min(clock.get_time() / 1000, 0.1)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
