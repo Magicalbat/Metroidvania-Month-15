@@ -27,6 +27,14 @@ class Player(Entity):
 
         self.dir = 1
 
+        self.acid = False
+
+    def enableAcid(self):
+        self.acid = True
+        self.waterParticles.colors = [
+            (0,255,0), (0,225,0), (0,220,100)
+        ]
+
     def draw(self, win, scroll):
         pygame.draw.rect(win, (0,245,255), (self.pos - scroll, (self.width, self.height)))
         #super().draw(win, scroll)

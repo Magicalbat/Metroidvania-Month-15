@@ -12,10 +12,18 @@ class Enemy(Entity):
         self.speed = 3 * 16
         self.dir = 1
         self.vel.x = self.speed
+
+        self.stunTimer = 0
+
+    def stun(self, time):
+        self.stunTimer = time
     
     def update(self, delta, tilemap=None, colRects=None):
-        if self.collisionDir & 0b0100 > 0 or self.collisionDir & 0b0001 > 0:
-            self.dir *= -1
-            self.vel.x = self.speed * self.dir
-        
-        super().update(delta, tilemap, colRects)
+        if self.stunTimer <= 0:
+            if self.collisionDir & 0b0100 > 0 or self.collisionDir & 0b0001 > 0:
+                self.dir *= -1
+                self.vel.x = self.speed * self.dir
+            
+            super().update(delta, tilemap, colRects)
+        else:
+            self.stunTimer -= delta

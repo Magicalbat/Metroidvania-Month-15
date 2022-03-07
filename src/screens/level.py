@@ -15,6 +15,56 @@ class Level(GameScreen):
         self.tilemap = Tilemap(16, tileImgs)
         extraData = self.tilemap.loadLevel(filepath)
 
+        self.processExtraData(extraData)
+
+    def setup(self, screenManager):
+        super().setup(screenManager)
+
+        self.player = Player(self.playerSpawn, 12, 20)
+        self.player.enableAcid()
+        self.enemies = [Enemy(pos, 12, 16) for pos in self.enemyPositions]
+
+        self.screenRect = pygame.Rect(0,0,0,0)
+
+    def draw(self, win : pygame.Surface):
+        self.camera.update(self.player, win.get_size())
+
+        self.screenRect = pygame.Rect(self.camera.scroll, win.get_size())
+        
+        self.tilemap.draw(win, self.camera.scroll)
+        self.player.draw(win, self.camera.scroll)
+        for enemy in self.enemies:
+            enemy.draw(win, self.camera.scroll)
+
+    def update(self, delta):
+        self.player.update(delta, self.tilemap, [enemy.rect for enemy in self.enemies if enemy.stunTimer > 0])
+
+        for enemy in self.enemies:
+            enemy.update(delta, self.tilemap)
+
+        for i in range(len(self.enemies))[::-1]:
+            if self.screenRect.colliderect(self.enemies[i].rect):
+                if self.player.waterParticles.collideRect(self.enemies[i].rect):
+                    if self.player.acid:
+                        self.enemies.pop(i)
+                    else:
+                        self.enemies[i].stun(1)
+
+        for enemy in self.enemies:
+            if enemy.stunTimer <= 0 and enemy.rect.colliderect(self.player.rect):
+                self.screenManager.reloadCurrentScreen()
+
+        for i, rect in self.levelChangeRects.items():
+            if rect.colliderect(self.player.rect):
+                self.screenManager.changeScreen(Level(f"res/levels/level{i}.json"))
+
+    def keydown(self, event):
+        self.player.keydown(event)
+
+    def keyup(self, event):
+        self.player.keyup(event)
+
+    def processExtraData(self, extraData):
         self.playerSpawn = Vector2(0,0)
         if "PlayerSpawn" in extraData:
             self.playerSpawn = Vector2(extraData["PlayerSpawn"][0][0], extraData["PlayerSpawn"][0][1] - 20)
@@ -41,43 +91,3 @@ class Level(GameScreen):
                     self.levelChangeRects[i] = pygame.Rect((extraData[f"{i} Level"][0], (16, 16)))
             else:   break
             i += 1
-
-    def setup(self, screenManager):
-        super().setup(screenManager)
-
-        self.player = Player(self.playerSpawn, 12, 20)
-        self.enemies = [Enemy(pos, 12, 16) for pos in self.enemyPositions]
-
-    def draw(self, win : pygame.Surface):
-        self.camera.update(self.player, win.get_size())
-        
-        self.tilemap.draw(win, self.camera.scroll)
-        self.player.draw(win, self.camera.scroll)
-        for enemy in self.enemies:
-            enemy.draw(win, self.camera.scroll)
-
-        for pos in self.enemyPositions:
-            pygame.draw.rect(win, (255,0,0), (pos-self.camera.scroll, (16,16)))
-
-    def update(self, delta):
-        self.player.update(delta, self.tilemap)
-
-        for enemy in self.enemies:
-            enemy.update(delta, self.tilemap)
-
-        for i in range(len(self.enemies))[::-1]:
-            if self.player.waterParticles.collideRect(self.enemies[i].rect):
-                self.enemies.pop(i)
-
-        if self.player.collideEntities(self.enemies):
-            self.screenManager.reloadCurrentScreen()
-
-        for i, rect in self.levelChangeRects.items():
-            if rect.colliderect(self.player.rect):
-                self.screenManager.changeScreen(Level(f"res/levels/level{i}.json"))
-
-    def keydown(self, event):
-        self.player.keydown(event)
-
-    def keyup(self, event):
-        self.player.keyup(event)
