@@ -45,7 +45,7 @@ class Entity:
         if self.applyCollision:
             if colRects is None:    colRects = []
             if tilemap is not None:
-                tilemap.getColRects(self.pos, self.width, self.height, self.vel * delta, colRects)
+                tilemap.getEntityColRects(self.pos, self.width, self.height, self.vel * delta, colRects)
 
             self.collisionDir = 0b0000
             

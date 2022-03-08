@@ -28,6 +28,7 @@ class Player(Entity):
         self.dir = 1
 
         self.acid = False
+        self.kickReady = False
 
     def enableAcid(self):
         self.acid = True
@@ -40,7 +41,7 @@ class Player(Entity):
         pygame.draw.rect(win, (0,245,255), (self.pos - scroll, (self.width, self.height)))
         #super().draw(win, scroll)
         self.waterParticles.draw(win, scroll)
-        
+
     def update(self, delta, tilemap=None, colRects=None):
         self.waterParticles.update(delta, tilemap)
         
@@ -49,10 +50,26 @@ class Player(Entity):
         self.vel.x *= 0.85
 
         left, right = keys[pygame.K_LEFT], keys[pygame.K_RIGHT]
-        if left:    self.dir = -1
-        if right:    self.dir = 1
-
-        if left or right:    self.vel.x = self.dir * self.speed
+        if left:
+            self.vel.x -= 12
+            self.vel.x = max(self.vel.x, -self.speed)
+            self.dir = -1
+        if right:
+            self.vel.x += 12
+            self.vel.x = min(self.vel.x, self.speed)
+            self.dir = 1
+            
+        if self.kickReady:
+            if keys[pygame.K_DOWN]:
+                r = pygame.Rect(self.pos.x, self.pos.y + self.height, self.width, self.height/2)
+                if r.collidelist(tilemap.getRectColRects(r)) != -1:
+                    self.kickReady = False
+                    self.vel.y = -750
+            elif right or left:
+                r = pygame.Rect(self.pos.x + self.width*self.dir, self.pos.y, self.width, self.height)
+                if r.collidelist(tilemap.getRectColRects(r)) != -1:
+                    self.kickReady = False
+                    self.vel.x = 750 * -self.dir
 
         if keys[pygame.K_x]:
             if self.dir < 0:
@@ -67,7 +84,13 @@ class Player(Entity):
             if self.collisionDir & 0b0010 > 0:
                 self.vel.y = self.maxJumpVel
 
+        if event.key == pygame.K_z:
+            self.kickReady = True
+
     def keyup(self, event):
         if event.key == pygame.K_c:
             if self.vel.y < self.minJumpVel:
                 self.vel.y = self.minJumpVel
+
+        if event.key == pygame.K_z:
+            self.kickReady = False

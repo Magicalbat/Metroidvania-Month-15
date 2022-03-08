@@ -23,23 +23,11 @@ class Tilemap:
             for rect in self.chunks[cp]:
                 if rect.collidepoint(p):    return True
         return False
-    
-    def getColRects(self, pos, width, height, vel, colRects=None):
-        testPointsX = (
-            pos.x,
-            pos.x + width,
-            pos.x + vel.x,
-            pos.x + width + vel.x
-        )
+
+    def _getColRects(self, testPointsX, testPointsY, colRects):
         minX = self.toChunkScale(min(testPointsX))
         maxX = self.toChunkScale(max(testPointsX))
 
-        testPointsY = (
-            pos.y,
-            pos.y + height,
-            pos.y + vel.y,
-            pos.y + height + vel.y
-        )
         minY = self.toChunkScale(min(testPointsY))
         maxY = self.toChunkScale(max(testPointsY))
 
@@ -53,6 +41,15 @@ class Tilemap:
             if pos in self.chunks:
                 colRects += self.chunks[pos]
         return colRects 
+    
+    def getEntityColRects(self, pos, width, height, vel, colRects=None):
+        return self._getColRects( \
+            ( pos.x, pos.x + width, pos.x + vel.x, pos.x + width + vel.x ),
+            ( pos.y, pos.y + height, pos.y + vel.y, pos.y + height + vel.y ), \
+            colRects)
+
+    def getRectColRects(self, rect, colRects=None):
+        return self._getColRects((rect.x, rect.right), (rect.y, rect.bottom), colRects)
         
     def draw(self, win, scroll=None):
         if scroll is None:    scroll = Vector2(0, 0)
