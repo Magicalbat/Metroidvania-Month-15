@@ -2,8 +2,11 @@ import pygame
 from pygame.math import Vector2
 
 from src.screens.screenmanager import ScreenManager, GameScreen
+
 from src.entities.player import Player
 from src.entities.enemy import GroundEnemy
+from src.entities.enemymanager import EnemyManager
+
 from src.utils.tilemap import Tilemap
 from src.utils.camera import Camera
 from src.utils.particles import Particles
@@ -15,13 +18,16 @@ class Level(GameScreen):
         self.tilemap = Tilemap(16, tileImgs)
         extraData = self.tilemap.loadLevel(filepath)
 
+        self.enemyManager = EnemyManager(extraData)
+
         self.processExtraData(extraData)
 
     def setup(self, screenManager):
         super().setup(screenManager)
 
         self.player = Player(self.playerSpawn, 12, 20)
-        self.enemies = [GroundEnemy(pos, 12, 16) for pos in self.enemyPositions]
+        self.enemyManager.setup()
+        #self.enemies = [GroundEnemy(pos, 12, 16) for pos in self.enemyPositions]
 
         self.screenRect = pygame.Rect(0,0,0,0)
 
@@ -32,26 +38,16 @@ class Level(GameScreen):
         
         self.tilemap.draw(win, self.camera.scroll)
         self.player.draw(win, self.camera.scroll)
-        for enemy in self.enemies:
-            enemy.draw(win, self.camera.scroll)
+
+        self.enemyManager.draw(win, self.camera.scroll, self.screenRect)
 
     def update(self, delta):
-        self.player.update(delta, self.tilemap, [enemy.rect for enemy in self.enemies if enemy.stunTimer > 0])
+        self.player.update(delta, self.tilemap, self.enemyManager.getStunnedRects())
 
-        for enemy in self.enemies:
-            enemy.update(delta, self.player, self.tilemap)
+        self.enemyManager.update(delta, self.tilemap, self.player, self.screenRect)
 
-        for i in range(len(self.enemies))[::-1]:
-            if self.screenRect.colliderect(self.enemies[i].rect):
-                if self.player.waterParticles.collideRect(self.enemies[i].rect):
-                    if self.player.acid:
-                        self.enemies.pop(i)
-                    else:
-                        self.enemies[i].stun(1)
-
-        for enemy in self.enemies:
-            if enemy.stunTimer <= 0 and enemy.rect.colliderect(self.player.rect):
-                self.screenManager.reloadCurrentScreen()
+        if self.enemyManager.reset:
+            self.screenManager.reloadCurrentScreen()
 
         for i, rect in self.levelChangeRects.items():
             if rect.colliderect(self.player.rect):
@@ -80,9 +76,9 @@ class Level(GameScreen):
                 cameraTriggerVectors.append((p1, p2))
         self.camera = Camera(cameraTriggerRects, cameraTriggerVectors)
 
-        self.enemyPositions = []
-        if "Enemies" in extraData:
-            for pos in extraData["Enemies"]:    self.enemyPositions.append(Vector2(pos))
+        #self.enemyPositions = []
+        #if "Enemies" in extraData:
+        #    for pos in extraData["Enemies"]:    self.enemyPositions.append(Vector2(pos))
         
         self.levelChangeRects = {}
         i = 0

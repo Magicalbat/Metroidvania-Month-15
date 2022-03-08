@@ -7,8 +7,6 @@ from src.screens.level import Level
 def main():
     pygame.init()
 
-    pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
-
     width = 320
     height = 180
     win = pygame.display.set_mode((width, height), pygame.SCALED | pygame.RESIZABLE)

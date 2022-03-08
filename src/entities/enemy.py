@@ -1,8 +1,7 @@
-from hashlib import new
-from matplotlib.cbook import Stack
 import pygame
 from pygame.math import Vector2
 
+import math
 from enum import Enum
 
 from src.entities.entity import Entity
@@ -17,7 +16,7 @@ def enemy(cls):
             
             self.stunTimer = 0
 
-            self.decoratorObj = cls(**kwargs)
+            self.decoratorObj = cls(self, **kwargs)
     
         def stun(self, time):
             self.stunTimer = time
@@ -34,13 +33,30 @@ def enemy(cls):
     return EnemyWrapper
 
 @enemy
+class JumpingEnemy:
+    class States(Enum):
+        IDLE = 0
+        ANGER = 1
+
+    def __init__(self, enemy):
+        self.currentState = self.States.IDLE
+
+        self.idleJumpHeight = 16 * 1.5
+        self.angerJumpHeight = 16 * 5
+
+        #self.idleJumpVel = 
+
+        self.idleSpeed = 16 * 2
+        self.angerSpeed = 16 * 4
+
+@enemy
 class GroundEnemy:
     class States(Enum): 
         PATROL = 0
         ATTACK = 1
         SEARCH = 2
         
-    def __init__(self):
+    def __init__(self, enemy):
         self.currentState = self.States.PATROL
 
         self.walkSpeed = 16 * 3

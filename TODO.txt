@@ -1,0 +1,33 @@
+Tuesday:
+    - Jumping enemy
+    - Flying enemy
+    - Easier enemy
+    - Kick ability
+    - Fire
+    - Slime Molds
+    - Boss?
+
+Wednesday:
+    - Another ability (bullet time?)
+    - Another boss hopefully
+    - More level objects
+    - Start art
+
+Thursday:
+    - ART
+    - Levels
+
+Friday:
+    - ART
+    - Levels
+
+Saturday:
+    - PANIC and Finish Everything
+    - Sound
+    - Make/Find music
+
+Sunday:
+    - Playtesting if not already
+    - Final adjustments 
+    - Building
+    - Store page
