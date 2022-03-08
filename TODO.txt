@@ -1,5 +1,4 @@
 Tuesday:
-    - Jumping enemy
     - Flying enemy
     - Easier enemy
     - Kick ability

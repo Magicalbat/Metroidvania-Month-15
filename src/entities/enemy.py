@@ -15,13 +15,26 @@ def enemy(cls):
             self.applyGravity, self.applyCollision = True, True
             
             self.stunTimer = 0
+            self.damageTimer = 0
+            self.maxHealth = 5
+            self.health = self.maxHealth
 
             self.decoratorObj = cls(self, **kwargs)
     
         def stun(self, time):
             self.stunTimer = time
+
+        # Return whether or not it is alive
+        def damage(self, amt):
+            if self.damageTimer <= 0:
+                self.health -= amt
+                self.damageTimer = 0.5
+            return self.health > 0
         
         def draw(self, win, scroll):
+            r = pygame.Rect(self.pos.x - scroll.x, self.pos.y - self.height/2 - scroll.y, self.width, self.height/4)
+            pygame.draw.rect(win, (255,0,0), r)
+            pygame.draw.rect(win, (0,255,0), (r.x, r.y, r.w * (self.health/self.maxHealth), r.h))
             self.decoratorObj.draw(win, self, scroll)
         
         def update(self, delta, player, tilemap=None, colRects=None):
@@ -30,24 +43,61 @@ def enemy(cls):
                 super().update(delta, tilemap, colRects)
             else:
                 self.stunTimer -= delta
+                
+            if self.damageTimer > 0:    self.damageTimer -= delta
     return EnemyWrapper
 
 @enemy
 class JumpingEnemy:
     class States(Enum):
         IDLE = 0
-        ANGER = 1
+        ATTACK = 1
 
     def __init__(self, enemy):
         self.currentState = self.States.IDLE
 
-        self.idleJumpHeight = 16 * 1.5
-        self.angerJumpHeight = 16 * 5
+        idleJumpHeight = 16 * 1.2
+        attackJumpHeight = 16 * 3.2
 
-        #self.idleJumpVel = 
+        self.idleJumpVel = -math.sqrt(2 * enemy.gravity * idleJumpHeight)
+        self.attackJumpVel = -math.sqrt(2 * enemy.gravity * attackJumpHeight)
 
         self.idleSpeed = 16 * 2
-        self.angerSpeed = 16 * 4
+        self.attackSpeed = 16 * 5
+
+        self.dir = -1
+
+    def draw(self, win, enemy, scroll):
+        col = (0,255,0)
+        if self.currentState == self.States.ATTACK:    col = (255,0,0)
+        pygame.draw.rect(win, col, pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
+
+    def update(self, delta, enemy, player):
+        if enemy.collisionDir & 0b0010 > 0:
+            if self.currentState == self.States.IDLE:
+                self.dir *= -1
+                enemy.vel.x = self.idleSpeed  * self.dir
+                enemy.vel.y = self.idleJumpVel
+            elif self.currentState == self.States.ATTACK:
+                enemy.vel.x = self.attackSpeed  * self.dir
+                enemy.vel.y = self.attackJumpVel
+
+        if self.currentState == self.States.ATTACK:
+            self.dir = ((enemy.pos.x + enemy.width*0.5) < (player.pos.x + player.width*0.5)) * 2 - 1
+            if abs(player.pos.x - enemy.pos.x) < 10:
+                if player.vel.length() < 0.1:    enemy.vel.x *= 0.9
+                else:    enemy.vel.x *= 0.96
+
+        # To attack
+        if self.currentState != self.States.ATTACK and enemy.center.distance_squared_to(player.center) < 2500: # radius - 50
+            self.changeState(self.States.ATTACK, enemy)
+
+        # Out of attack
+        if self.currentState == self.States.ATTACK and enemy.center.distance_squared_to(player.center) > 10000: # radius - 100
+            self.changeState(self.States.IDLE, enemy)
+
+    def changeState(self, newState, enemy):
+        self.currentState = newState
 
 @enemy
 class GroundEnemy:
@@ -93,7 +143,7 @@ class GroundEnemy:
 
     def changeState(self, newState, enemy):
         enemy.vel.x = 0
-        if newState == self.States.SEARCH:
+        if newState != self.States.ATTACK:
             self.dir = (self.dir > 0) * 2 - 1
             self.searchTimer = 2
 

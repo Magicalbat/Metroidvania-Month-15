@@ -7,12 +7,13 @@ from src.entities.enemy import *
 
 class EnemyManager:
     enemyTypes = {
-        "GroundEnemies": GroundEnemy
+        "GroundEnemies": GroundEnemy,
+        "JumpingEnemies": JumpingEnemy
     }
     def __init__(self, extraData):
         self.enemySpawns = {}
 
-        for enemyType in ["GroundEnemies"]:
+        for enemyType in ["GroundEnemies", "JumpingEnemies"]:
             if enemyType in extraData:
                 self.enemySpawns[enemyType] = extraData[enemyType]
 
@@ -36,7 +37,8 @@ class EnemyManager:
             if screenRect.colliderect(self.enemies[i].rect):
                 if player.waterParticles.collideRect(self.enemies[i].rect):
                     if player.acid:
-                        self.enemies.pop(i)
+                        if not self.enemies[i].damage(1):
+                            self.enemies.pop(i)
                     else:
                         self.enemies[i].stun(1)
 
