@@ -43,7 +43,7 @@ class EnemyManager:
                         self.enemies[i].stun(1)
 
         for enemy in self.enemies:
-            if enemy.stunTimer <= 0 and enemy.rect.colliderect(player.rect):
+            if enemy.stunTimer <= 0 and enemy.collide(player.rect):#rect(player.rect):
                 self.reset = True
 
     def getStunnedRects(self):

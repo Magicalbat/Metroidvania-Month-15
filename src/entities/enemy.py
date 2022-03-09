@@ -22,6 +22,17 @@ def enemy(cls):
             self.kicked = False
 
             self.decoratorObj = cls(self, **kwargs)
+
+            if hasattr(self.decoratorObj, "collide"):
+                self.collide = self.childCollide
+            else:
+                self.collide = self.internalCollide 
+
+        def internalCollide(self, rect):
+            return self.rect.colliderect(rect)
+
+        def childCollide(self, rect):
+            return self.decoratorObj.collide(self.rect, rect)
     
         def stun(self, time):
             self.stunTimer = time
@@ -58,6 +69,22 @@ def enemy(cls):
                 
             if self.damageTimer > 0:    self.damageTimer -= delta
     return EnemyWrapper
+
+@enemy
+class FlyingEnemy:
+    # No states, dumb enemy
+
+    class Projectile:
+        def __init__(self, pos, target):
+            pass
+
+    def __init__(self, enemy):
+        enemy.applyGravity = False
+
+        self.angle = 0
+        self.shootTimer = 0
+
+        self.projectiles = []
 
 @enemy
 class JumpingEnemy:
