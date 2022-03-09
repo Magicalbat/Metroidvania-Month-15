@@ -6,6 +6,7 @@ from src.screens.screenmanager import ScreenManager, GameScreen
 from src.entities.player import Player
 from src.entities.enemy import GroundEnemy
 from src.entities.enemymanager import EnemyManager
+from src.entities.firemanager import FireManager
 
 from src.utils.tilemap import Tilemap
 from src.utils.camera import Camera
@@ -37,11 +38,10 @@ class Level(GameScreen):
         self.screenRect = pygame.Rect(self.camera.scroll, win.get_size())
         
         self.tilemap.draw(win, self.camera.scroll)
+        
+        self.fireManager.draw(win, self.camera.scroll)
 
-        for fire in self.firePositions:
-            pygame.draw.rect(win, (255,128,0), (fire[0]-self.camera.scroll.x, fire[1]-self.camera.scroll.y, 16, 16))
         self.player.draw(win, self.camera.scroll)
-
 
         self.enemyManager.draw(win, self.camera.scroll, self.screenRect)
 
@@ -51,7 +51,10 @@ class Level(GameScreen):
 
         self.enemyManager.update(delta, self.tilemap, self.player, self.screenRect)
 
-        if self.enemyManager.reset:
+        self.fireManager.update(delta, self.player)
+
+        if self.enemyManager.reset or self.fireManager.reset:
+            self.fireManager.reset = False
             self.screenManager.reloadCurrentScreen()
 
         for i, rect in self.levelChangeRects.items():
@@ -69,7 +72,7 @@ class Level(GameScreen):
     def processExtraData(self, extraData):
         self.playerSpawn = Vector2(0,0)
         if "PlayerSpawn" in extraData:
-            self.playerSpawn = Vector2(extraData["PlayerSpawn"][0][0], extraData["PlayerSpawn"][0][1] - 20)
+            self.playerSpawn = Vector2(extraData["PlayerSpawn"][0][0], extraData["PlayerSpawn"][0][1] - 16)
         cameraTriggerRects = []
         cameraTriggerVectors = []
         if "CameraTriggers" in extraData:
@@ -81,8 +84,7 @@ class Level(GameScreen):
                 cameraTriggerVectors.append((p1, p2))
         self.camera = Camera(cameraTriggerRects, cameraTriggerVectors)
 
-        if "Fire" in extraData:
-            self.firePositions = extraData["Fire"]
+        self.fireManager = FireManager(extraData["Fire"])
 
         self.levelChangeRects = {}
         i = 0
