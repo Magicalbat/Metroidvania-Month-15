@@ -84,7 +84,10 @@ class Level(GameScreen):
                 cameraTriggerVectors.append((p1, p2))
         self.camera = Camera(cameraTriggerRects, cameraTriggerVectors)
 
-        self.fireManager = FireManager(extraData["Fire"])
+        if "Fire" in extraData:
+            self.fireManager = FireManager(extraData["Fire"])
+        else:
+            self.fireManager = FireManager([])
 
         self.levelChangeRects = {}
         i = 0

@@ -13,6 +13,8 @@ class Entity:
         self.pos = Vector2(x, y)
         self.width, self.height = w, h
 
+        self.rect = pygame.Rect(self.pos, (w, h))
+
         self.vel = Vector2(0, 0)
 
         # UP RIGHT DOWN LEFT
@@ -31,9 +33,12 @@ class Entity:
         out.y = math.ceil(self.pos.y) if self.vel.y > 0 else int(self.pos.y)
         return out
 
-    @property
-    def rect(self):
-        return pygame.Rect(self.clampedPos, (self.width, self.height))
+    #@property
+    #def rect(self):
+    #    return pygame.Rect(self.clampedPos, (self.width, self.height))
+
+    def updateRectPos(self):
+        self.rect.topleft = self.clampedPos
 
     @property
     def center(self):
@@ -50,6 +55,7 @@ class Entity:
             self.collisionDir = 0b0000
             
             self.pos.x += self.vel.x * delta
+            self.updateRectPos()
             indices = self.rect.collidelistall(colRects)
 
             for i in indices:
@@ -63,6 +69,7 @@ class Entity:
                     self.collisionDir |= 0b0001
 
             self.pos.y += self.vel.y * delta
+            self.updateRectPos()
             indices = self.rect.collidelistall(colRects)
 
             for i in indices:
@@ -74,9 +81,12 @@ class Entity:
                     self.pos.y = colRects[i].bottom
                     self.vel.y = 0
                     self.collisionDir |= 0b1000
+
+            self.updateRectPos()
             
         elif self.applyVelocity:
             self.pos += self.vel * delta
+            self.updateRectPos()
 
     def collideEntities(self, entities):
         rect = self.rect

@@ -8,12 +8,13 @@ from src.entities.enemy import *
 class EnemyManager:
     enemyTypes = {
         "GroundEnemies": GroundEnemy,
-        "JumpingEnemies": JumpingEnemy
+        "JumpingEnemies": JumpingEnemy,
+        "FlyingEnemies": FlyingEnemy
     }
     def __init__(self, extraData):
         self.enemySpawns = {}
 
-        for enemyType in ["GroundEnemies", "JumpingEnemies"]:
+        for enemyType in ["GroundEnemies", "JumpingEnemies", "FlyingEnemies"]:
             if enemyType in extraData:
                 self.enemySpawns[enemyType] = extraData[enemyType]
 

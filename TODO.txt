@@ -1,6 +1,5 @@
 - Flying enemy
 - Easier enemy
-- Fire
 - Slime Molds
 - More level objects
 - Start art

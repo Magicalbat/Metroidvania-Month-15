@@ -62,7 +62,7 @@ def enemy(cls):
                     self.vel.x *= 0.9
                     if abs(self.vel.x) < 10: self.kicked = False
                 else:
-                    self.decoratorObj.update(delta, self, player)
+                    self.decoratorObj.update(delta, self, player, tilemap)
                 super().update(delta, tilemap, colRects)
             else:
                 self.stunTimer -= delta
@@ -75,16 +75,60 @@ class FlyingEnemy:
     # No states, dumb enemy
 
     class Projectile:
-        def __init__(self, pos, target):
-            pass
+        def __init__(self, pos, target, r=2):
+            self.pos = pos
+
+            speed = 16*6
+
+            dirVec = target - pos
+            self.vel = speed * dirVec.normalize()
+            #self.angle = math.atan2(dirVec.y, dirVec.x)
+
+            self.r = r
+        
+        def draw(self, win, scroll):
+            pygame.draw.rect(win, (255,255,255), (self.pos.x-self.r-scroll.x, self.pos.y-self.r-scroll.y, self.r+self.r, self.r+self.r))
+        
+        def update(self, delta):
+            self.pos += self.vel * delta
 
     def __init__(self, enemy):
         enemy.applyGravity = False
 
         self.angle = 0
-        self.shootTimer = 0
+        self.shootRate = 0.75
+        self.shootTimer = self.shootRate
+
+        self.speed = 16 * 3
 
         self.projectiles = []
+    
+    def collide(self, r1, r2):
+        for proj in self.projectiles:
+            if r2.collidepoint(proj.pos):  return True
+        return r1.colliderect(r2)
+    
+    def draw(self, win, enemy, scroll):
+        pygame.draw.rect(win, (0,255,0), (enemy.pos.x - scroll.x, enemy.pos.y - scroll.y, enemy.width, enemy.height), 1)
+        for proj in self.projectiles:
+            proj.draw(win, scroll)
+    
+    def update(self, delta, enemy, player, tilemap):
+        self.angle += 3 * delta
+        self.angle = math.fmod(self.angle, math.tau)
+
+        enemy.vel.x = math.sin(self.angle) * self.speed
+        enemy.vel.y = math.cos(self.angle) * self.speed
+
+        self.shootTimer -= delta
+        if self.shootTimer <= 0:
+            self.shootTimer = self.shootRate
+            self.projectiles.append(self.Projectile(enemy.center, player.center))
+
+        for i in range(len(self.projectiles))[::-1]:
+            self.projectiles[i].update(delta)
+            if tilemap.collidePoint(self.projectiles[i].pos):
+                self.projectiles.pop(i)
 
 @enemy
 class JumpingEnemy:
@@ -111,7 +155,7 @@ class JumpingEnemy:
         if self.currentState == self.States.ATTACK:    col = (255,0,0)
         pygame.draw.rect(win, col, pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
 
-    def update(self, delta, enemy, player):
+    def update(self, delta, enemy, player, tilemap):
         if enemy.collisionDir & 0b0010 > 0:
             if self.currentState == self.States.IDLE:
                 self.dir *= -1
@@ -159,7 +203,7 @@ class GroundEnemy:
         if self.currentState == self.States.SEARCH: col = (0,0,255)
         pygame.draw.rect(win, col, pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
 
-    def update(self, delta, enemy, player):
+    def update(self, delta, enemy, player, tilemap):
         if self.currentState == self.States.PATROL:
             if enemy.collisionDir & 0b0100 > 0 or enemy.collisionDir & 0b0001 > 0:
                 self.dir *= -1
