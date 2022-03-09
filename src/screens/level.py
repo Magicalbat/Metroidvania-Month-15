@@ -37,9 +37,14 @@ class Level(GameScreen):
         self.screenRect = pygame.Rect(self.camera.scroll, win.get_size())
         
         self.tilemap.draw(win, self.camera.scroll)
+
+        for fire in self.firePositions:
+            pygame.draw.rect(win, (255,128,0), (fire[0]-self.camera.scroll.x, fire[1]-self.camera.scroll.y, 16, 16))
         self.player.draw(win, self.camera.scroll)
 
+
         self.enemyManager.draw(win, self.camera.scroll, self.screenRect)
+
 
     def update(self, delta):
         self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects())
@@ -76,10 +81,9 @@ class Level(GameScreen):
                 cameraTriggerVectors.append((p1, p2))
         self.camera = Camera(cameraTriggerRects, cameraTriggerVectors)
 
-        #self.enemyPositions = []
-        #if "Enemies" in extraData:
-        #    for pos in extraData["Enemies"]:    self.enemyPositions.append(Vector2(pos))
-        
+        if "Fire" in extraData:
+            self.firePositions = extraData["Fire"]
+
         self.levelChangeRects = {}
         i = 0
         while True:

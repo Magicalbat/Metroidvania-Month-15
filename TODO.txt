@@ -1,7 +1,6 @@
 Tuesday:
     - Flying enemy
     - Easier enemy
-    - Kick ability
     - Fire
     - Slime Molds
     - Boss?
