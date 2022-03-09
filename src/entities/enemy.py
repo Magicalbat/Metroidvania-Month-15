@@ -19,10 +19,17 @@ def enemy(cls):
             self.maxHealth = 5
             self.health = self.maxHealth
 
+            self.kicked = False
+
             self.decoratorObj = cls(self, **kwargs)
     
         def stun(self, time):
             self.stunTimer = time
+        
+        def kick(self, vel):
+            self.stunTimer = 0
+            self.kicked = True
+            self.vel.x = vel
 
         # Return whether or not it is alive
         def damage(self, amt):
@@ -32,14 +39,19 @@ def enemy(cls):
             return self.health > 0
         
         def draw(self, win, scroll):
-            r = pygame.Rect(self.pos.x - scroll.x, self.pos.y - self.height/2 - scroll.y, self.width, self.height/4)
-            pygame.draw.rect(win, (255,0,0), r)
-            pygame.draw.rect(win, (0,255,0), (r.x, r.y, r.w * (self.health/self.maxHealth), r.h))
+            if self.health != self.maxHealth:
+                r = pygame.Rect(self.pos.x - scroll.x, self.pos.y - self.height/2 - scroll.y, self.width, self.height/4)
+                pygame.draw.rect(win, (255,0,0), r)
+                pygame.draw.rect(win, (0,255,0), (r.x, r.y, r.w * (self.health/self.maxHealth), r.h))
             self.decoratorObj.draw(win, self, scroll)
         
         def update(self, delta, player, tilemap=None, colRects=None):
             if self.stunTimer <= 0:
-                self.decoratorObj.update(delta, self, player)
+                if self.kicked:
+                    self.vel.x *= 0.9
+                    if abs(self.vel.x) < 10: self.kicked = False
+                else:
+                    self.decoratorObj.update(delta, self, player)
                 super().update(delta, tilemap, colRects)
             else:
                 self.stunTimer -= delta
@@ -89,7 +101,7 @@ class JumpingEnemy:
                 else:    enemy.vel.x *= 0.96
 
         # To attack
-        if self.currentState != self.States.ATTACK and enemy.center.distance_squared_to(player.center) < 2500: # radius - 50
+        if self.currentState != self.States.ATTACK and (enemy.damageTimer > 0 or enemy.center.distance_squared_to(player.center) < 2500): # radius - 50
             self.changeState(self.States.ATTACK, enemy)
 
         # Out of attack
@@ -138,7 +150,7 @@ class GroundEnemy:
             if self.searchTimer < 0:
                 self.changeState(self.States.PATROL, enemy)
 
-        if self.currentState != self.States.ATTACK and enemy.center.distance_squared_to(player.center) < 2500: # radius - 50
+        if self.currentState != self.States.ATTACK and (enemy.damageTimer > 0 or enemy.center.distance_squared_to(player.center) < 2500): # radius - 50
             self.changeState(self.States.ATTACK, enemy)
 
     def changeState(self, newState, enemy):

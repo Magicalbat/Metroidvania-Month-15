@@ -1,3 +1,4 @@
+from tkinter import W
 import pygame
 from pygame.math import Vector2
 
@@ -11,6 +12,9 @@ class Player(Entity):
         super().__init__(*args)
 
         self.speed = 16*5
+        self.accel = 8
+        self.airFriction = 0.93
+        self.groundFriction = 0.85
 
         self.applyGravity, self.applyCollision = True, True
 
@@ -28,48 +32,81 @@ class Player(Entity):
         self.dir = 1
 
         self.acid = False
-        self.kickReady = False
+        self.kickTimer = 0
+        self.horizontalKicking = False
 
-    def enableAcid(self):
-        self.acid = True
-        self.waterParticles.clear()
-        self.waterParticles.colors = [
-            (0,255,0), (0,225,0), (0,220,100)
-        ]
+        self.kickPower = Vector2(350, 250)
+
+    def toggleAcid(self):
+        if self.acid:
+            self.acid = False
+            self.waterParticles.clear()
+            self.waterParticles.colors = [
+                (0,0,255), (0,0,225), (0,0,200),
+                (0,245,255), (0,128,255), (0,225,225),
+            ]
+        else:
+            self.acid = True
+            self.waterParticles.clear()
+            self.waterParticles.colors = [
+                (0,255,0), (0,225,0), (0,220,100)
+            ]
 
     def draw(self, win, scroll):
         pygame.draw.rect(win, (0,245,255), (self.pos - scroll, (self.width, self.height)))
         #super().draw(win, scroll)
         self.waterParticles.draw(win, scroll)
 
-    def update(self, delta, tilemap=None, colRects=None):
+        # Draw kick hitbox
+        if self.kickTimer > 0:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_DOWN]:
+                r = pygame.Rect(self.pos.x, self.pos.y + self.height, self.width, self.height/2)
+            else:
+                r = pygame.Rect(self.pos.x + self.width*self.dir, self.pos.y, self.width, self.height)
+            pygame.draw.rect(win, (255,255,0), (r.x-scroll.x, r.y-scroll.y, r.w, r.h), 1)
+
+    def update(self, delta, tilemap=None, enemyManager=None, colRects=None):
         self.waterParticles.update(delta, tilemap)
         
         keys = pygame.key.get_pressed()
 
-        self.vel.x *= 0.85
+        if self.collisionDir & 0b0010 > 0:
+            self.vel.x *= self.groundFriction
+        else:
+            self.vel.x *= self.airFriction
 
-        left, right = keys[pygame.K_LEFT], keys[pygame.K_RIGHT]
-        if left:
-            self.vel.x -= 12
-            self.vel.x = max(self.vel.x, -self.speed)
+        if keys[pygame.K_LEFT]:
+            self.vel.x -= self.accel 
+            if not self.horizontalKicking:
+                self.vel.x = max(self.vel.x, -self.speed)
             self.dir = -1
-        if right:
-            self.vel.x += 12
-            self.vel.x = min(self.vel.x, self.speed)
+        if keys[pygame.K_RIGHT]:
+            self.vel.x += self.accel 
+            if not self.horizontalKicking:
+                self.vel.x = min(self.vel.x, self.speed)
             self.dir = 1
+        if self.horizontalKicking:
+            if self.collisionDir & 0b0010 > 0 or abs(self.vel.x) < 100:
+                self.horizontalKicking = False
             
-        if self.kickReady:
+        if self.kickTimer > 0:
+            self.kickTimer -= delta
             if keys[pygame.K_DOWN]:
                 r = pygame.Rect(self.pos.x, self.pos.y + self.height, self.width, self.height/2)
                 if r.collidelist(tilemap.getRectColRects(r)) != -1:
-                    self.kickReady = False
-                    self.vel.y = -750
-            elif right or left:
+                    self.vel.y = -self.kickPower.y
+                    self.kickTimer = 0
+            else:
                 r = pygame.Rect(self.pos.x + self.width*self.dir, self.pos.y, self.width, self.height)
                 if r.collidelist(tilemap.getRectColRects(r)) != -1:
-                    self.kickReady = False
-                    self.vel.x = 750 * -self.dir
+                    self.vel.x = self.kickPower.x * -self.dir
+                    self.kickTimer = 0
+                    self.horizontalKicking = True
+                for enemy in enemyManager.enemies:
+                    if r.colliderect(enemy.rect):
+                        enemy.kick(self.kickPower.x * self.dir)
+                        self.kickTimer = 0
 
         if keys[pygame.K_x]:
             if self.dir < 0:
@@ -84,13 +121,10 @@ class Player(Entity):
             if self.collisionDir & 0b0010 > 0:
                 self.vel.y = self.maxJumpVel
 
-        if event.key == pygame.K_z:
-            self.kickReady = True
+        if event.key == pygame.K_z:# and self.collisionDir & 0b0010 <= 0:
+            self.kickTimer = 0.2
 
     def keyup(self, event):
         if event.key == pygame.K_c:
             if self.vel.y < self.minJumpVel:
                 self.vel.y = self.minJumpVel
-
-        if event.key == pygame.K_z:
-            self.kickReady = False

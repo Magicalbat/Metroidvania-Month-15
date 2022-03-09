@@ -42,7 +42,7 @@ class Level(GameScreen):
         self.enemyManager.draw(win, self.camera.scroll, self.screenRect)
 
     def update(self, delta):
-        self.player.update(delta, self.tilemap, self.enemyManager.getStunnedRects())
+        self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects())
 
         self.enemyManager.update(delta, self.tilemap, self.player, self.screenRect)
 
@@ -56,7 +56,7 @@ class Level(GameScreen):
     def keydown(self, event):
         self.player.keydown(event)
         if event.key == pygame.K_t:
-            self.player.enableAcid()
+            self.player.toggleAcid()
 
     def keyup(self, event):
         self.player.keyup(event)
