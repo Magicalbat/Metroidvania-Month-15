@@ -27,13 +27,15 @@ class Particles:
                      self.pos[i].y - self.siz[i] - scroll.y, \
                      self.siz[i] * 2, self.siz[i] * 2))
 
-    def update(self, delta, tilemap=None):
+    def update(self, delta, tilemap=None, colRects=None):
+        if colRects is None:    colRects = []
         for i in range(len(self.pos))[::-1]:
             self.vel[i] += self.accel * delta
 
             if self.collision:
                 self.pos[i].x += self.vel[i].x * delta
-                if tilemap.collidePoint(self.pos[i]):
+                if tilemap.collidePoint(self.pos[i]) or \
+                    any([rect.collidepoint(self.pos[i]) for rect in colRects]):
                     self.vel[i].x *= -1
                     self.pos[i].x += self.vel[i].x * 2 * delta
                     

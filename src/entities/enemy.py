@@ -238,3 +238,20 @@ class GroundEnemy:
             self.searchTimer = 2
 
         self.currentState = newState
+
+@enemy
+class SlowEnemy:
+    def __init__(self, enemy):
+        self.speed = 16 * 3.5
+
+        self.dir = 1
+
+        enemy.vel.x = self.speed * self.dir
+
+    def draw(self, win, enemy, scroll):
+        pygame.draw.rect(win, (0,255,0), (enemy.pos - scroll, (enemy.width, enemy.height)), 1)
+
+    def update(self, delta, enemy, player, tilemap):
+        if enemy.collisionDir & 0b0100 > 0 or enemy.collisionDir & 0b0001 > 0:
+            self.dir *= -1
+            enemy.vel.x = self.speed * self.dir

@@ -6,11 +6,11 @@ from src.screens.screenmanager import ScreenManager, GameScreen
 from src.entities.player import Player
 from src.entities.enemy import GroundEnemy
 from src.entities.enemymanager import EnemyManager
-from src.entities.firemanager import FireManager
 
 from src.utils.tilemap import Tilemap
 from src.utils.camera import Camera
 from src.utils.particles import Particles
+from src.utils.specialtiles import SpecialTileManager
 from src.utils.common import *
 
 class Level(GameScreen):
@@ -28,6 +28,7 @@ class Level(GameScreen):
 
         self.player = Player(self.playerSpawn, 12, 20)
         self.enemyManager.setup()
+        self.specialTileManager.setup()
         #self.enemies = [GroundEnemy(pos, 12, 16) for pos in self.enemyPositions]
 
         self.screenRect = pygame.Rect(0,0,0,0)
@@ -38,21 +39,20 @@ class Level(GameScreen):
         self.screenRect = pygame.Rect(self.camera.scroll-Vector2(25,25), (win.get_width()+25, win.get_width()+25))
         
         self.tilemap.draw(win, self.camera.scroll)
-        self.fireManager.draw(win, self.camera.scroll)
+        self.specialTileManager.draw(win, self.camera.scroll)
 
         self.player.draw(win, self.camera.scroll)
         self.enemyManager.draw(win, self.camera.scroll)
 
 
     def update(self, delta):
-        self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects())
+        self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects()+self.specialTileManager.getColRects())
 
         self.enemyManager.update(delta, self.tilemap, self.player, self.screenRect)
 
-        self.fireManager.update(delta, self.player)
+        self.specialTileManager.update(delta, self.player)
 
-        if self.enemyManager.reset or self.fireManager.reset:
-            self.fireManager.reset = False
+        if self.specialTileManager.reset:
             self.screenManager.reloadCurrentScreen()
 
         for i, rect in self.levelChangeRects.items():
@@ -82,10 +82,7 @@ class Level(GameScreen):
                 cameraTriggerVectors.append((p1, p2))
         self.camera = Camera(cameraTriggerRects, cameraTriggerVectors)
 
-        if "Fire" in extraData:
-            self.fireManager = FireManager(extraData["Fire"])
-        else:
-            self.fireManager = FireManager([])
+        self.specialTileManager = SpecialTileManager(extraData)
 
         self.levelChangeRects = {}
         i = 0

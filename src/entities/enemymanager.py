@@ -9,12 +9,13 @@ class EnemyManager:
     enemyTypes = {
         "GroundEnemies": GroundEnemy,
         "JumpingEnemies": JumpingEnemy,
-        "FlyingEnemies": FlyingEnemy
+        "FlyingEnemies": FlyingEnemy,
+        "SlowEnemies": SlowEnemy
     }
     def __init__(self, extraData):
         self.enemySpawns = {}
 
-        for enemyType in ["GroundEnemies", "JumpingEnemies", "FlyingEnemies"]:
+        for enemyType in ["GroundEnemies", "JumpingEnemies", "FlyingEnemies", "SlowEnemies"]:
             if enemyType in extraData:
                 self.enemySpawns[enemyType] = extraData[enemyType]
 
@@ -36,7 +37,7 @@ class EnemyManager:
             enemy.update(delta, player, tilemap)
 
         for i in range(len(self.enemies))[::-1]:
-            if enemy.onScreen:#screenRect.colliderect(self.enemies[i].rect):
+            if self.enemies[i].onScreen:#screenRect.colliderect(self.enemies[i].rect):
                 if player.waterParticles.collideRect(self.enemies[i].rect):
                     if player.acid:
                         if not self.enemies[i].damage(1):
