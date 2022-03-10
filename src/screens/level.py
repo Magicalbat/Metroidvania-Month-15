@@ -1,6 +1,8 @@
 import pygame
 from pygame.math import Vector2
 
+import copy
+
 from src.screens.screenmanager import ScreenManager, GameScreen
 
 from src.entities.player import Player
@@ -29,12 +31,22 @@ class Level(GameScreen):
         self.player = Player(self.playerSpawn, 12, 20)
         self.enemyManager.setup()
         self.specialTileManager.setup()
+
+        self.awaitingSpawn = False
+        self.awaitingSpawnTimer = 0
         #self.enemies = [GroundEnemy(pos, 12, 16) for pos in self.enemyPositions]
 
         self.screenRect = pygame.Rect(0,0,0,0)
 
     def draw(self, win : pygame.Surface):
         self.camera.update(self.player, win.get_size())
+        if self.camera.changedTarget:
+            self.awaitingSpawn = True
+            self.awaitingSpawnTimer = 0.1
+
+        if self.awaitingSpawn and self.awaitingSpawnTimer <= 0 and self.player.collisionDir & 0b0010 > 0:
+            self.playerSpawn = copy.deepcopy(self.player.pos)
+            self.awaitingSpawn = False
 
         self.screenRect = pygame.Rect(self.camera.scroll-Vector2(25,25), (win.get_width()+25, win.get_width()+25))
         
@@ -44,6 +56,7 @@ class Level(GameScreen):
         self.player.draw(win, self.camera.scroll)
         self.enemyManager.draw(win, self.camera.scroll)
 
+        pygame.draw.rect(win, (255,0,0), (self.playerSpawn - self.camera.scroll, (16,16)))
 
     def update(self, delta):
         self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects()+self.specialTileManager.getColRects())
@@ -52,12 +65,15 @@ class Level(GameScreen):
 
         self.specialTileManager.update(delta, self.player)
 
-        if self.specialTileManager.reset:
+        if self.enemyManager.reset or self.specialTileManager.reset:
             self.screenManager.reloadCurrentScreen()
 
         for i, rect in self.levelChangeRects.items():
             if rect.colliderect(self.player.rect):
                 self.screenManager.changeScreen(Level(f"res/levels/level{i}.json"))
+                
+        if self.awaitingSpawnTimer > 0:
+            self.awaitingSpawnTimer -= delta
 
     def keydown(self, event):
         self.player.keydown(event)

@@ -10,6 +10,9 @@ class Camera:
         self.bounds = [Vector2(0, 0), Vector2(0, 0)]
         self.targetIndex = 0
 
+        self.prevTarget = -1
+        self.changedTarget = False
+
     def scrollRect(self, r):
         return pygame.Rect(r.x - self.scroll.x, r.y - self.scroll.y, r.w, r.h)
 
@@ -17,7 +20,14 @@ class Camera:
         self.scroll += ((e.center - Vector2(winDim)*0.5) - self.scroll) / 10
 
         col = e.rect.collidelist(self.triggerRects)
-        if col > -1:    self.targetIndex = col#self.cameraBounds = self.cameraTriggers[col]
+        if col > -1:    self.targetIndex = col
+
+        self.changedTarget = False
+        if self.prevTarget != self.targetIndex:
+            self.changedTarget = True
+            
+        self.prevTarget = self.targetIndex
+        
         self.bounds[0] = self.bounds[0].lerp(self.triggerVectors[self.targetIndex][0], 0.075)
         self.bounds[1] = self.bounds[1].lerp(self.triggerVectors[self.targetIndex][1], 0.075)
         

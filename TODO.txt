@@ -1,5 +1,3 @@
-- Easier enemy
-- Slime Molds
 - Enemy rush thing
 - Boss
 - New level transition system (just edit the level files directly)
