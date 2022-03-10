@@ -25,17 +25,18 @@ class EnemyManager:
             for pos in positions:
                 self.enemies.append(self.enemyTypes[enemyType](pos, 12, 16))
 
-    def draw(self, win, scroll, screenRect):
+    def draw(self, win, scroll):
         for enemy in self.enemies:
-            if screenRect.colliderect(enemy.rect):
-                enemy.draw(win, scroll)
+            #if screenRect.colliderect(enemy.rect):
+            enemy.draw(win, scroll)
 
     def update(self, delta, tilemap, player, screenRect):
         for enemy in self.enemies:
+            enemy.onScreen = enemy.rect.colliderect(screenRect)
             enemy.update(delta, player, tilemap)
 
         for i in range(len(self.enemies))[::-1]:
-            if screenRect.colliderect(self.enemies[i].rect):
+            if enemy.onScreen:#screenRect.colliderect(self.enemies[i].rect):
                 if player.waterParticles.collideRect(self.enemies[i].rect):
                     if player.acid:
                         if not self.enemies[i].damage(1):

@@ -21,6 +21,8 @@ def enemy(cls):
 
             self.kicked = False
 
+            self.onScreen = False
+
             self.decoratorObj = cls(self, **kwargs)
 
             if hasattr(self.decoratorObj, "collide"):
@@ -109,7 +111,8 @@ class FlyingEnemy:
         return r1.colliderect(r2)
     
     def draw(self, win, enemy, scroll):
-        pygame.draw.rect(win, (0,255,0), (enemy.pos.x - scroll.x, enemy.pos.y - scroll.y, enemy.width, enemy.height), 1)
+        if enemy.onScreen:
+            pygame.draw.rect(win, (0,255,0), (enemy.pos.x - scroll.x, enemy.pos.y - scroll.y, enemy.width, enemy.height), 1)
         for proj in self.projectiles:
             proj.draw(win, scroll)
     
@@ -120,10 +123,12 @@ class FlyingEnemy:
         enemy.vel.x = math.sin(self.angle) * self.speed
         enemy.vel.y = math.cos(self.angle) * self.speed
 
-        self.shootTimer -= delta
-        if self.shootTimer <= 0:
-            self.shootTimer = self.shootRate
-            self.projectiles.append(self.Projectile(enemy.center, player.center))
+        if enemy.onScreen and enemy.pos.distance_squared_to(player.pos) < 40000:
+            if self.shootTimer <= 0:
+                self.shootTimer = self.shootRate
+                self.projectiles.append(self.Projectile(enemy.center, player.center))
+            else:
+                self.shootTimer -= delta
 
         for i in range(len(self.projectiles))[::-1]:
             self.projectiles[i].update(delta)
@@ -151,9 +156,10 @@ class JumpingEnemy:
         self.dir = -1
 
     def draw(self, win, enemy, scroll):
-        col = (0,255,0)
-        if self.currentState == self.States.ATTACK:    col = (255,0,0)
-        pygame.draw.rect(win, col, pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
+        if enemy.onScreen:
+            col = (0,255,0)
+            if self.currentState == self.States.ATTACK:    col = (255,0,0)
+            pygame.draw.rect(win, col, pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
 
     def update(self, delta, enemy, player, tilemap):
         if enemy.collisionDir & 0b0010 > 0:
@@ -198,10 +204,11 @@ class GroundEnemy:
         self.searchTimer = 0
     
     def draw(self, win, enemy, scroll):
-        col = (0,255,0)
-        if self.currentState == self.States.ATTACK: col = (255,0,0)
-        if self.currentState == self.States.SEARCH: col = (0,0,255)
-        pygame.draw.rect(win, col, pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
+        if enemy.onScreen:
+            col = (0,255,0)
+            if self.currentState == self.States.ATTACK: col = (255,0,0)
+            if self.currentState == self.States.SEARCH: col = (0,0,255)
+            pygame.draw.rect(win, col, pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
 
     def update(self, delta, enemy, player, tilemap):
         if self.currentState == self.States.PATROL:

@@ -35,15 +35,13 @@ class Level(GameScreen):
     def draw(self, win : pygame.Surface):
         self.camera.update(self.player, win.get_size())
 
-        self.screenRect = pygame.Rect(self.camera.scroll, win.get_size())
+        self.screenRect = pygame.Rect(self.camera.scroll-Vector2(25,25), (win.get_width()+25, win.get_width()+25))
         
         self.tilemap.draw(win, self.camera.scroll)
-        
         self.fireManager.draw(win, self.camera.scroll)
 
         self.player.draw(win, self.camera.scroll)
-
-        self.enemyManager.draw(win, self.camera.scroll, self.screenRect)
+        self.enemyManager.draw(win, self.camera.scroll)
 
 
     def update(self, delta):

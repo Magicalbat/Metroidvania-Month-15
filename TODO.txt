@@ -1,14 +1,14 @@
-- Flying enemy
 - Easier enemy
 - Slime Molds
-- More level objects
-- Start art
+- Enemy rush thing
+- Boss
+- New level transition system (just edit the level files directly)
 - ART
 - Levels
-- PANIC and Finish Everything
 - Sound
 - Make/Find music
 - Playtesting if not already
+- PANIC and Finish Everything
 - Final adjustments 
 - Building
 - Store page
