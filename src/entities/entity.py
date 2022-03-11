@@ -33,12 +33,12 @@ class Entity:
         out.y = math.ceil(self.pos.y) if self.vel.y > 0 else int(self.pos.y)
         return out
 
-    #@property
-    #def rect(self):
-    #    return pygame.Rect(self.clampedPos, (self.width, self.height))
-
     def updateRectPos(self):
         self.rect.topleft = self.clampedPos
+
+    def updateRectDim(self):
+        self.rect.w = self.width
+        self.rect.h = self.height
 
     @property
     def center(self):

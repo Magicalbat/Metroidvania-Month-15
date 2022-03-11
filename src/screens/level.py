@@ -4,7 +4,7 @@ from pygame.math import Vector2
 import copy
 
 from src.screens.screenmanager import ScreenManager, GameScreen
-
+    
 from src.entities.player import Player
 from src.entities.enemy import GroundEnemy
 from src.entities.enemymanager import EnemyManager
@@ -56,7 +56,8 @@ class Level(GameScreen):
         self.player.draw(win, self.camera.scroll)
         self.enemyManager.draw(win, self.camera.scroll)
 
-        pygame.draw.rect(win, (255,0,0), (self.playerSpawn - self.camera.scroll, (16,16)))
+        for dl in self.doorLocks:
+            pygame.draw.rect(win, (255,255,255), self.camera.scrollRect(dl))
 
     def update(self, delta):
         self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects()+self.specialTileManager.getColRects())
@@ -68,10 +69,6 @@ class Level(GameScreen):
         if self.enemyManager.reset or self.specialTileManager.reset:
             self.screenManager.reloadCurrentScreen()
 
-        for i, rect in self.levelChangeRects.items():
-            if rect.colliderect(self.player.rect):
-                self.screenManager.changeScreen(Level(f"res/levels/level{i}.json"))
-                
         if self.awaitingSpawnTimer > 0:
             self.awaitingSpawnTimer -= delta
 
@@ -98,13 +95,9 @@ class Level(GameScreen):
                 cameraTriggerVectors.append((p1, p2))
         self.camera = Camera(cameraTriggerRects, cameraTriggerVectors)
 
-        self.specialTileManager = SpecialTileManager(extraData)
+        self.doorLocks = []
+        if "DoorLock" in extraData:
+            for pos in extraData["DoorLock"]:
+                self.doorLocks.append(pygame.Rect(pos, (self.tilemap.tileSize, self.tilemap.tileSize)))
 
-        self.levelChangeRects = {}
-        i = 0
-        while True:
-            if f"{i} Level" in extraData:
-                if len(extraData[f"{i} Level"]):
-                    self.levelChangeRects[i] = pygame.Rect((extraData[f"{i} Level"][0], (16, 16)))
-            else:   break
-            i += 1
+        self.specialTileManager = SpecialTileManager(extraData)
