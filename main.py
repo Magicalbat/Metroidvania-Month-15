@@ -9,7 +9,7 @@ def main():
 
     width = 320
     height = 180
-    win = pygame.display.set_mode((width, height), pygame.SCALED | pygame.RESIZABLE)
+    win = pygame.display.set_mode((width, height), pygame.SCALED | pygame.RESIZABLE, 16)
     pygame.display.set_caption('Metroidvania Month 15')
 
     clock = pygame.time.Clock()

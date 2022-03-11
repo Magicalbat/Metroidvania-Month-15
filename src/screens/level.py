@@ -17,7 +17,7 @@ from src.utils.common import *
 
 class Level(GameScreen):
     def __init__(self, filepath="res/levels/level0.json"):
-        tileImgs = loadSpriteSheet("res/temptiles.png", (16,16), (3,1), (1,1), 3, (0,0,0))
+        tileImgs = loadSpriteSheet("res/imgs/temptiles.png", (16,16), (3,1), (1,1), 3, (0,0,0))
         self.tilemap = Tilemap(16, tileImgs)
         extraData = self.tilemap.loadLevel(filepath)
 
@@ -28,7 +28,7 @@ class Level(GameScreen):
     def setup(self, screenManager):
         super().setup(screenManager)
 
-        self.player = Player(self.playerSpawn, 12, 20)
+        self.player = Player(self.playerSpawn, 12, 16)
         self.enemyManager.setup()
         self.specialTileManager.setup()
 

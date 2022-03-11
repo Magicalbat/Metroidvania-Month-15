@@ -6,10 +6,18 @@ import math
 
 from src.entities.entity import Entity
 from src.utils.particles import Particles
+from src.utils.animation import Animation
+from src.utils.common import loadSpriteSheet
 
 class Player(Entity):
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args)
+
+        if "images" in kwargs:
+            self.imgs = kwargs["images"]
+        else:
+            self.imgs = loadSpriteSheet("res/imgs/player.png", (16,16), (4,3), (1,1), 11, (0,0,0))
+        self.idleAnim = Animation((0,4), 6, realTime=True)
 
         self.speed = 16*5
         self.accel = 8
@@ -53,7 +61,12 @@ class Player(Entity):
             ]
 
     def draw(self, win, scroll):
-        pygame.draw.rect(win, (0,245,255), (self.pos - scroll, (self.width, self.height)))
+        drawIndex = int(self.idleAnim.value)
+        if self.vel.y < 0:  drawIndex = 8
+        elif self.vel.y > 0:    drawIndex = 9
+        if self.horizontalKicking:  drawIndex = 10
+        win.blit(pygame.transform.flip(self.imgs[drawIndex], self.dir == -1, False), self.pos-scroll-(2, 0))
+        #pygame.draw.rect(win, (0,245,255), (self.pos - scroll, (self.width, self.height)), 1)
         #super().draw(win, scroll)
         self.waterParticles.draw(win, scroll)
 
@@ -68,6 +81,8 @@ class Player(Entity):
 
     def update(self, delta, tilemap=None, enemyManager=None, colRects=None):
         self.waterParticles.update(delta, tilemap)
+
+        self.idleAnim.update(delta)
         
         keys = pygame.key.get_pressed()
 
