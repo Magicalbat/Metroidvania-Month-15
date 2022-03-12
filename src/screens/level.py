@@ -28,7 +28,10 @@ class Level(GameScreen):
     def setup(self, screenManager):
         super().setup(screenManager)
 
-        self.player = Player(self.playerSpawn, 12, 16)
+        if hasattr(self, "player"):
+            self.player = Player(self.playerSpawn, 12, 16, images=self.player.imgs)
+        else:
+            self.player = Player(self.playerSpawn, 12, 16)
         self.enemyManager.setup()
         self.specialTileManager.setup()
 

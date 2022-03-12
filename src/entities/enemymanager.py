@@ -1,8 +1,7 @@
 import pygame
 from pygame.math import Vector2
 
-from enum import Enum
-
+from src.utils.common import loadSpriteSheet
 from src.entities.enemy import *
 
 class EnemyManager:
@@ -12,19 +11,28 @@ class EnemyManager:
         "FlyingEnemies": FlyingEnemy,
         "SlowEnemies": SlowEnemy
     }
+    enemyImgs = {
+        "GroundEnemies": (9, 12), 
+        "JumpingEnemies": (6, 9),
+        "FlyingEnemies": (3, 6),
+        "SlowEnemies": (0, 3)
+    }
     def __init__(self, extraData):
         self.enemySpawns = {}
 
-        for enemyType in ["GroundEnemies", "JumpingEnemies", "FlyingEnemies", "SlowEnemies"]:
+        for enemyType in ["GroundEnemies"]:#["GroundEnemies", "JumpingEnemies", "FlyingEnemies", "SlowEnemies"]:
             if enemyType in extraData:
                 self.enemySpawns[enemyType] = extraData[enemyType]
+        
+        self.imgs = loadSpriteSheet("res/imgs/enemies.png", (16,16), (3,4), (1,1), 12, (0,0,0))
 
     def setup(self):
         self.reset = False
         self.enemies = []
         for enemyType, positions in self.enemySpawns.items():
             for pos in positions:
-                self.enemies.append(self.enemyTypes[enemyType](pos, 12, 16))
+                self.enemies.append(self.enemyTypes[enemyType](pos, 12, 16, \
+                    images=self.imgs[self.enemyImgs[enemyType][0]:self.enemyImgs[enemyType][1]]))
 
     def draw(self, win, scroll):
         for enemy in self.enemies:

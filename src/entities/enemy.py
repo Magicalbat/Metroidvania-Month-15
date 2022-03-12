@@ -6,6 +6,7 @@ from enum import Enum
 
 from src.entities.entity import Entity
 from src.utils.common import lerp
+from src.utils.animation import Animation
 
 def enemy(cls):
     class EnemyWrapper(Entity):
@@ -94,7 +95,7 @@ class FlyingEnemy:
         def update(self, delta):
             self.pos += self.vel * delta
 
-    def __init__(self, enemy):
+    def __init__(self, enemy, **kwargs):
         enemy.applyGravity = False
 
         self.angle = 0
@@ -104,6 +105,9 @@ class FlyingEnemy:
         self.speed = 16 * 3
 
         self.projectiles = []
+
+        self.imgs = kwargs["images"]
+        self.anim = Animation([0,3], 4, realTime=True)
     
     def collide(self, r1, r2):
         for proj in self.projectiles:
@@ -112,11 +116,15 @@ class FlyingEnemy:
     
     def draw(self, win, enemy, scroll):
         if enemy.onScreen:
-            pygame.draw.rect(win, (0,255,0), (enemy.pos.x - scroll.x, enemy.pos.y - scroll.y, enemy.width, enemy.height), 1)
+            drawIndex = int(self.anim.value)
+            win.blit(self.imgs[drawIndex], enemy.pos-scroll+(-2,0))
+            #pygame.draw.rect(win, (0,255,0), (enemy.pos.x - scroll.x, enemy.pos.y - scroll.y, enemy.width, enemy.height), 1)
         for proj in self.projectiles:
             proj.draw(win, scroll)
     
     def update(self, delta, enemy, player, tilemap):
+        self.anim.update(delta)
+
         self.angle += 3 * delta
         self.angle = math.fmod(self.angle, math.tau)
 
@@ -141,7 +149,7 @@ class JumpingEnemy:
         IDLE = 0
         ATTACK = 1
 
-    def __init__(self, enemy):
+    def __init__(self, enemy, **kwargs):
         self.currentState = self.States.IDLE
 
         idleJumpHeight = 16 * 1.2
@@ -155,11 +163,17 @@ class JumpingEnemy:
 
         self.dir = -1
 
+        self.imgs = kwargs["images"]
+
     def draw(self, win, enemy, scroll):
         if enemy.onScreen:
-            col = (0,255,0)
-            if self.currentState == self.States.ATTACK:    col = (255,0,0)
-            pygame.draw.rect(win, col, pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
+            #col = (0,255,0)
+            #if self.currentState == self.States.ATTACK:    col = (255,0,0)
+            drawIndex = 1
+            if self.currentState == self.States.ATTACK: drawIndex = 0
+            if enemy.vel.y < -50:  drawIndex = 2
+            win.blit(self.imgs[drawIndex], enemy.pos-scroll+(-2, 0))
+            pygame.draw.rect(win, (0,255,0), pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
 
     def update(self, delta, enemy, player, tilemap):
         if enemy.collisionDir & 0b0010 > 0:
@@ -195,22 +209,34 @@ class GroundEnemy:
         ATTACK = 1
         SEARCH = 2
         
-    def __init__(self, enemy):
+    def __init__(self, enemy, **kwargs):
         self.currentState = self.States.PATROL
+
+        enemy.height, enemy.rect.h = 10, 10
 
         self.walkSpeed = 16 * 3
         self.runSpeed  = 16 * 4.5
         self.dir = 1
         self.searchTimer = 0
+
+        self.imgs = kwargs["images"]
+        self.anim = Animation([0,2], 4, realTime=True)
     
     def draw(self, win, enemy, scroll):
         if enemy.onScreen:
-            col = (0,255,0)
-            if self.currentState == self.States.ATTACK: col = (255,0,0)
-            if self.currentState == self.States.SEARCH: col = (0,0,255)
-            pygame.draw.rect(win, col, pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
+            #col = (0,255,0)
+            #if self.currentState == self.States.ATTACK: col = (255,0,0)
+            #if self.currentState == self.States.SEARCH: col = (0,0,255)
+            drawIndex = int(self.anim.value)
+            if self.currentState != self.States.PATROL and drawIndex == 1:   drawIndex += 1
+            win.blit(pygame.transform.flip(self.imgs[drawIndex], self.dir < 0, False), enemy.pos-scroll+(-2, -7))
+            #pygame.draw.rect(win, (0, 255, 0), pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
 
     def update(self, delta, enemy, player, tilemap):
+        if self.currentState == self.States.PATROL: self.anim.speed = 4
+        else:   self.anim.speed = 8
+        self.anim.update(delta)
+
         if self.currentState == self.States.PATROL:
             if enemy.collisionDir & 0b0100 > 0 or enemy.collisionDir & 0b0001 > 0:
                 self.dir *= -1
@@ -241,17 +267,24 @@ class GroundEnemy:
 
 @enemy
 class SlowEnemy:
-    def __init__(self, enemy):
+    def __init__(self, enemy, **kwargs):
         self.speed = 16 * 3.5
 
         self.dir = 1
 
         enemy.vel.x = self.speed * self.dir
 
+        self.imgs = kwargs["images"]
+        self.anim = Animation([1,3], 4, realTime=True)
+
     def draw(self, win, enemy, scroll):
-        pygame.draw.rect(win, (0,255,0), (enemy.pos - scroll, (enemy.width, enemy.height)), 1)
+        drawIndex = int(self.anim.value)
+        if enemy.collisionDir & 0b0010 == 0: drawIndex = 0
+        win.blit(pygame.transform.flip(self.imgs[drawIndex], self.dir == -1, False), enemy.pos-scroll+(-2, 0))
+        #pygame.draw.rect(win, (0,255,0), (enemy.pos - scroll, (enemy.width, enemy.height)), 1)
 
     def update(self, delta, enemy, player, tilemap):
+        self.anim.update(delta)
         if enemy.collisionDir & 0b0100 > 0 or enemy.collisionDir & 0b0001 > 0:
             self.dir *= -1
             enemy.vel.x = self.speed * self.dir
