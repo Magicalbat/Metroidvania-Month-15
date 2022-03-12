@@ -38,7 +38,7 @@ class SpecialTileManager:
         self.slimeManager.update(delta, player)
         self.acidManager.update(delta, player)
 
-        self.reset = self.fireManager.reset or self.slimeManager.reset or self.acidManager.reset
+        self.reset = not player.invincible and (self.fireManager.reset or self.slimeManager.reset or self.acidManager.reset)
 
 class AcidManager:
     def __init__(self, positions, tileSize=16):

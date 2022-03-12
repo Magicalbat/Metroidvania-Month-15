@@ -51,6 +51,7 @@ class Level(GameScreen):
         self.screenRect = pygame.Rect(self.camera.scroll-Vector2(25,25), (win.get_width()+25, win.get_width()+25))
         
         self.tilemap.draw(win, self.camera.scroll)
+        #self.tilemap.drawCollision(win, self.camera.scroll)
         self.specialTileManager.draw(win, self.camera.scroll)
 
         self.player.draw(win, self.camera.scroll)
@@ -74,7 +75,7 @@ class Level(GameScreen):
 
     def keydown(self, event):
         self.player.keydown(event)
-        if event.key == pygame.K_t:
+        if event.key == pygame.K_a:
             self.player.toggleAcid()
 
     def keyup(self, event):

@@ -36,14 +36,15 @@ class EnemyManager:
             enemy.onScreen = enemy.rect.colliderect(screenRect)
             enemy.update(delta, player, tilemap)
 
-        for i in range(len(self.enemies))[::-1]:
-            if self.enemies[i].onScreen:#screenRect.colliderect(self.enemies[i].rect):
-                if player.waterParticles.collideRect(self.enemies[i].rect):
-                    if player.acid:
-                        if not self.enemies[i].damage(1):
-                            self.enemies.pop(i)
-                    else:
-                        self.enemies[i].stun(1)
+        if not player.invincible:
+            for i in range(len(self.enemies))[::-1]:
+                if self.enemies[i].onScreen:#screenRect.colliderect(self.enemies[i].rect):
+                    if player.waterParticles.collideRect(self.enemies[i].rect):
+                        if player.acid:
+                            if not self.enemies[i].damage(1):
+                                self.enemies.pop(i)
+                        else:
+                            self.enemies[i].stun(1)
 
         for enemy in self.enemies:
             if enemy.stunTimer <= 0 and enemy.collide(player.rect):#rect(player.rect):

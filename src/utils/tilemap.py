@@ -1,7 +1,7 @@
 import pygame
 from pygame.math import Vector2
 
-import json
+import json, math
 
 class Tilemap:
     def __init__(self, tileSize, imgs, chunkSize=8):
@@ -12,7 +12,7 @@ class Tilemap:
         self.chunkSize = chunkSize
 
     def toChunkScale(self, p):
-        return int(p/self.tileSize/self.chunkSize)
+        return math.floor(p/self.tileSize/self.chunkSize)
 
     def toChunkPos(self, p):
         return (self.toChunkScale(p[0]), self.toChunkScale(p[1]))

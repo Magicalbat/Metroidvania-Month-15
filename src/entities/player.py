@@ -18,6 +18,7 @@ class Player(Entity):
         else:
             self.imgs = loadSpriteSheet("res/imgs/player.png", (16,16), (4,3), (1,1), 11, (0,0,0))
         self.idleAnim = Animation((0,4), 6, realTime=True)
+        self.runAnim = Animation((4,8), 10, realTime=True)
 
         self.speed = 16*5
         self.accel = 8
@@ -32,7 +33,7 @@ class Player(Entity):
         self.maxJumpVel = -math.sqrt(2 * self.gravity * maxJumpHeight)
         self.minJumpVel = -math.sqrt(2 * self.gravity * minJumpHeight)
 
-        self.waterParticles = Particles((3,5), (-.1,.1,-.1,.1), circle=True, speed=5, accel=Vector2(0, self.gravity), collision=True, colors=[
+        self.waterParticles = Particles((2,4), (-.1,.1,-.1,.1), circle=True, speed=4, accel=Vector2(0, self.gravity), collision=True, colors=[
             (0,0,255), (0,0,225), (0,0,200),
             (0,245,255), (0,128,255), (0,225,225),
         ])
@@ -42,6 +43,10 @@ class Player(Entity):
         self.acid = False
         self.kickTimer = 0
         self.horizontalKicking = False
+        self.kickDir = 1
+        self.kickedEnemyTimer = 0
+        
+        self.invincible = False
 
         self.kickPower = Vector2(350, 250)
 
@@ -62,10 +67,14 @@ class Player(Entity):
 
     def draw(self, win, scroll):
         drawIndex = int(self.idleAnim.value)
+        if abs(self.vel.x) > 25:    drawIndex = int(self.runAnim.value)
         if self.vel.y < 0:  drawIndex = 8
         elif self.vel.y > 0:    drawIndex = 9
-        if self.horizontalKicking:  drawIndex = 10
-        win.blit(pygame.transform.flip(self.imgs[drawIndex], self.dir == -1, False), self.pos-scroll-(2, 0))
+        if self.horizontalKicking or self.kickedEnemyTimer > 0:
+            drawIndex = 10
+            win.blit(pygame.transform.flip(self.imgs[drawIndex], self.kickDir == -1, False), self.pos-scroll-(2, 0))
+        else:
+            win.blit(pygame.transform.flip(self.imgs[drawIndex], self.dir == -1, False), self.pos-scroll-(2, 0))
         #pygame.draw.rect(win, (0,245,255), (self.pos - scroll, (self.width, self.height)), 1)
         #super().draw(win, scroll)
         self.waterParticles.draw(win, scroll)
@@ -83,6 +92,7 @@ class Player(Entity):
         self.waterParticles.update(delta, tilemap)
 
         self.idleAnim.update(delta)
+        self.runAnim.update(delta)
         
         keys = pygame.key.get_pressed()
 
@@ -118,10 +128,13 @@ class Player(Entity):
                     self.vel.x = self.kickPower.x * -self.dir
                     self.kickTimer = 0
                     self.horizontalKicking = True
+                    self.kickDir = self.dir
                 for enemy in enemyManager.enemies:
                     if r.colliderect(enemy.rect):
                         enemy.kick(self.kickPower.x * self.dir)
                         self.kickTimer = 0
+                        self.kickedEnemyTimer = 0.2
+        if self.kickedEnemyTimer > 0:    self.kickedEnemyTimer -= delta
 
         if keys[pygame.K_x]:
             if self.dir < 0:

@@ -53,7 +53,7 @@ class Entity:
                 tilemap.getEntityColRects(self.pos, self.width, self.height, self.vel * delta, colRects)
 
             self.collisionDir = 0b0000
-            
+
             self.pos.x += self.vel.x * delta
             self.updateRectPos()
             indices = self.rect.collidelistall(colRects)
