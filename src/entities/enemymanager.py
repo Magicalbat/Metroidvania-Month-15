@@ -44,6 +44,9 @@ class EnemyManager:
                         images=self.imgs[self.enemyImgs[enemyType][0]:self.enemyImgs[enemyType][1]]))
             else:
                 self.boss = Boss(positions, 12, 16, images=self.imgs[0:3])
+        
+        self.bossDamageRects = [pygame.Rect(pos, (16, 16)) for pos in self.bossDamagePoints]
+        self.bossDamageProgress = [16 for _ in self.bossDamageRects]
 
     def draw(self, win, scroll):
         if self.boss is not None:
@@ -52,20 +55,47 @@ class EnemyManager:
         for enemy in self.enemies:
             #if screenRect.colliderect(enemy.rect):
             enemy.draw(win, scroll)
+        
+        for p, r in zip(self.bossDamageProgress, self.bossDamageRects):
+            w = (p/16) * 6
+            pygame.draw.rect(win, (0,200,50), (r.centerx-scroll.x-w*0.5, r.y-scroll.y, w, 5))
+            pygame.draw.circle(win, (255,50,50), (r.x-scroll.x+r.w*0.5, r.y-scroll.y+5+r.w*0.5), r.w*0.5)
 
-    def update(self, delta, tilemap, player, screenRect):
+    def update(self, delta, tilemap, player, screenRect, playerSpawn=(0,0)):
         if self.boss is not None:
-            self.boss.update(delta, tilemap)
+            self.boss.update(delta, tilemap, player)
+            if self.boss.spawnEnemy:
+                self.boss.spawnEnemy = False
+                self.enemies.append(self.enemyTypes[self.boss.enemySpawnType](self.boss.enemySpawnPos, 12, 16, \
+                    images=self.imgs[self.enemyImgs[self.boss.enemySpawnType][0]:self.enemyImgs[self.boss.enemySpawnType][1]]))
+                dir = self.boss.enemySpawnDir
+                self.enemies[-1].decoratorObj.dir = dir
+                self.enemies[-1].vel.x = self.enemies[-1].decoratorObj.getCurrentSpeed() * dir
 
             if not player.invincible:
-                if player.rect.colliderect(self.boss.rect):
+                if self.boss.collide(player.rect):
                     self.reset = True
 
             if player.acid:
                 if player.waterParticles.collideRect(self.boss.rect):
+                    origPhase = self.boss.phase
                     if not self.boss.damage(1):
                         self.boss = None
                         self.bossDamagePoints = []
+                    if self.boss is not None and self.boss.phase != origPhase:
+                        player.pos = Vector2(playerSpawn)
+                        player.updateRectPos()
+                for i in range(len(self.bossDamageProgress))[::-1]:
+                    if player.waterParticles.collideRect(self.bossDamageRects[i]):
+                        self.bossDamageProgress[i] -= 0.25
+                        if self.bossDamageProgress[i] < 3:
+                            self.bossDamageRects.pop(i)
+                            self.bossDamageProgress.pop(i)
+
+                            player.pos = Vector2(playerSpawn)
+                            player.updateRectPos()
+
+                            self.boss.invincible = False
 
         for enemy in self.enemies:
             enemy.onScreen = enemy.rect.colliderect(screenRect)

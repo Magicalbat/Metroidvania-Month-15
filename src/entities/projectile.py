@@ -2,10 +2,8 @@ import pygame
 from pygame.math import Vector2
 
 class Projectile:
-    def __init__(self, pos, target, r=2):
+    def __init__(self, pos, target, r=2, speed=16*6):
         self.pos = pos
-
-        speed = 16*6
 
         dirVec = target - pos
         self.vel = speed * dirVec.normalize()

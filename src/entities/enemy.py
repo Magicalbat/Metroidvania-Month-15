@@ -205,6 +205,11 @@ class GroundEnemy:
 
         self.imgs = kwargs["images"]
         self.anim = Animation([0,2], 4, realTime=True)
+
+    def getCurrentSpeed(self):
+        if self.currentState == self.States.PATROL:
+            return self.walkSpeed
+        return self.runSpeed
     
     def draw(self, win, enemy, scroll):
         if enemy.onScreen:
@@ -260,6 +265,9 @@ class SlowEnemy:
 
         self.imgs = kwargs["images"]
         self.anim = Animation([1,3], 4, realTime=True)
+    
+    def getCurrentSpeed(self):
+        return self.speed
 
     def draw(self, win, enemy, scroll):
         drawIndex = int(self.anim.value)

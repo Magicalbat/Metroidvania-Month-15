@@ -66,7 +66,7 @@ class Level(GameScreen):
     def update(self, delta):
         self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects()+self.specialTileManager.getColRects())
 
-        self.enemyManager.update(delta, self.tilemap, self.player, self.screenRect)
+        self.enemyManager.update(delta, self.tilemap, self.player, self.screenRect, self.playerSpawn)
 
         self.specialTileManager.update(delta, self.player)
 

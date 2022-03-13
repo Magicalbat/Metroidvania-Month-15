@@ -1,4 +1,3 @@
-from tkinter import W
 import pygame
 from pygame.math import Vector2
 
@@ -77,8 +76,7 @@ class Player(Entity):
             win.blit(pygame.transform.flip(self.imgs[drawIndex], self.kickDir == -1, False), self.pos-scroll-(2, 0))
         else:
             win.blit(pygame.transform.flip(self.imgs[drawIndex], self.dir == -1, False), self.pos-scroll-(2, 0))
-        #pygame.draw.rect(win, (0,245,255), (self.pos - scroll, (self.width, self.height)), 1)
-        #super().draw(win, scroll)
+
         self.waterParticles.draw(win, scroll)
 
         # Draw kick hitbox
