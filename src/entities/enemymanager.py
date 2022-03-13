@@ -20,7 +20,7 @@ class EnemyManager:
     def __init__(self, extraData):
         self.enemySpawns = {}
 
-        for enemyType in ["GroundEnemies"]:#["GroundEnemies", "JumpingEnemies", "FlyingEnemies", "SlowEnemies"]:
+        for enemyType in ["GroundEnemies", "JumpingEnemies", "FlyingEnemies", "SlowEnemies"]:
             if enemyType in extraData:
                 self.enemySpawns[enemyType] = extraData[enemyType]
         

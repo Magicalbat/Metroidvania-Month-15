@@ -173,7 +173,7 @@ class JumpingEnemy:
             if self.currentState == self.States.ATTACK: drawIndex = 0
             if enemy.vel.y < -50:  drawIndex = 2
             win.blit(self.imgs[drawIndex], enemy.pos-scroll+(-2, 0))
-            pygame.draw.rect(win, (0,255,0), pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
+            #pygame.draw.rect(win, (0,255,0), pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
 
     def update(self, delta, enemy, player, tilemap):
         if enemy.collisionDir & 0b0010 > 0:
