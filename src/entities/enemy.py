@@ -83,7 +83,7 @@ class FlyingEnemy:
         enemy.applyGravity = False
 
         self.angle = 0
-        self.shootRate = 0.75
+        self.shootRate = 1
         self.shootTimer = self.shootRate
 
         self.speed = 16 * 3
@@ -118,7 +118,7 @@ class FlyingEnemy:
         if enemy.onScreen and enemy.pos.distance_squared_to(player.pos) < 40000:
             if self.shootTimer <= 0:
                 self.shootTimer = self.shootRate
-                self.projectiles.append(self.Projectile(enemy.center, player.center))
+                self.projectiles.append(Projectile(enemy.center, player.center))
             else:
                 self.shootTimer -= delta
 
@@ -217,7 +217,7 @@ class GroundEnemy:
             #if self.currentState == self.States.ATTACK: col = (255,0,0)
             #if self.currentState == self.States.SEARCH: col = (0,0,255)
             drawIndex = int(self.anim.value)
-            if self.currentState != self.States.PATROL and drawIndex == 1:   drawIndex += 1
+            if self.currentState != self.States.PATROL:   drawIndex += 1
             win.blit(pygame.transform.flip(self.imgs[drawIndex], self.dir < 0, False), enemy.pos-scroll+(-2, -7))
             #pygame.draw.rect(win, (0, 255, 0), pygame.Rect(enemy.pos - scroll, (enemy.width, enemy.height)), 1)
 

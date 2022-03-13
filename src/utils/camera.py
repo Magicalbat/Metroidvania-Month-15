@@ -24,7 +24,7 @@ class Camera:
         if col > -1:    self.targetIndex = col
 
         self.changedTarget = False
-        if self.prevTarget != self.targetIndex:
+        if self.prevTarget != -1 and self.prevTarget != self.targetIndex:
             self.changedTarget = True
             
         self.prevTarget = self.targetIndex

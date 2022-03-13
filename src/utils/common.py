@@ -25,5 +25,18 @@ def loadSpriteSheet(imgPath, spriteSize, dim, padding, count, colorKey=None):
     
     return imgs
 
+def swapImgColor(img, oldCol, newCol):
+    outImg = pygame.Surface((img.get_width(), img.get_height()))
+    outImg.fill(newCol)
+
+    imgCopy = img.copy()
+    imgCopy.set_colorkey(oldCol)
+
+    outImg.blit(imgCopy, (0,0))
+
+    outImg.set_colorkey(img.get_colorkey())
+    
+    return outImg
+
 def lerp(a, b, d):
     return a * (1 - d) + b * d

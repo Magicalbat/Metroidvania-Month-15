@@ -27,6 +27,7 @@ class EnemyManager:
         
         if "Boss" in extraData:
             self.enemySpawns["Boss"] = extraData["Boss"][0]
+        self.bossDamagePoints = []
         if "BossDamagePoints" in extraData:
             self.bossDamagePoints = extraData["BossDamagePoints"]
         
@@ -75,16 +76,30 @@ class EnemyManager:
             if not player.invincible:
                 if self.boss.collide(player.rect):
                     self.reset = True
+            
+            if self.boss.phase > 0 and player.pos.y < 120:
+                if player.pos.x > 140 and player.pos.x < 550:
+                    player.displayText("Destroying these might help", 1)
+                else:
+                    player.displayText("Maybe I need to kick to get up there", 1)
 
             if player.acid:
                 if player.waterParticles.collideRect(self.boss.rect):
-                    origPhase = self.boss.phase
-                    if not self.boss.damage(1):
-                        self.boss = None
-                        self.bossDamagePoints = []
-                    if self.boss is not None and self.boss.phase != origPhase:
-                        player.pos = Vector2(playerSpawn)
-                        player.updateRectPos()
+                    if not self.boss.invincible:
+                        origPhase = self.boss.phase
+                        if not self.boss.damage(1):
+                            self.boss = None
+                            self.bossDamagePoints = []
+                        if self.boss is not None and self.boss.phase != origPhase:
+                            player.pos = Vector2(playerSpawn)
+                            player.updateRectPos()
+                            player.textQueue = []
+                            player.currentText = None
+
+                            if self.boss.phase == 1:
+                                player.displayText("The shrink ray is wearing off!", 2)
+                    else:
+                        player.displayText("I'll have to find another way to damage it")
                 for i in range(len(self.bossDamageProgress))[::-1]:
                     if player.waterParticles.collideRect(self.bossDamageRects[i]):
                         self.bossDamageProgress[i] -= 0.25
@@ -94,8 +109,13 @@ class EnemyManager:
 
                             player.pos = Vector2(playerSpawn)
                             player.updateRectPos()
+                            player.textQueue = []
+                            player.currentText = None
 
                             self.boss.invincible = False
+            
+            if self.boss is None:
+                self.enemies = []
 
         for enemy in self.enemies:
             enemy.onScreen = enemy.rect.colliderect(screenRect)

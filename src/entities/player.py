@@ -1,21 +1,31 @@
 import pygame
 from pygame.math import Vector2
 
-import math
+import math, time
 
 from src.entities.entity import Entity
 from src.utils.particles import Particles
 from src.utils.animation import Animation
+from src.utils.text import Text
 from src.utils.common import loadSpriteSheet
 
 class Player(Entity):
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
 
+        if "text" in kwargs:
+            self.text = kwargs["text"]
+        else:
+            self.text = Text()
+            self.text.loadFontImg("res/imgs/text.png")
+        self.textQueue = []
+        self.textTimer = 0
+        self.currentText = None
+
         if "images" in kwargs:
             self.imgs = kwargs["images"]
         else:
-            self.imgs = loadSpriteSheet("res/imgs/player.png", (16,16), (4,3), (1,1), 11, (0,0,0))
+            self.imgs = loadSpriteSheet("res/imgs/player.png", (16,16), (4,3), (1,1), 12, (0,0,0))
         self.idleAnim = Animation((0,4), 6, realTime=True)
         self.runAnim = Animation((4,8), 10, realTime=True)
 
@@ -49,6 +59,10 @@ class Player(Entity):
         self.invincible = False
 
         self.kickPower = Vector2(350, 250)
+    
+    def displayText(self, text, time=3):
+        if (text, time) not in self.textQueue:
+            self.textQueue.append((text, time))
 
     def toggleAcid(self):
         if self.acid:
@@ -68,7 +82,7 @@ class Player(Entity):
     def draw(self, win, scroll):
         drawIndex = int(self.idleAnim.value)
         if abs(self.vel.x) > 25:    drawIndex = int(self.runAnim.value)
-        if self.vel.y < 0:  drawIndex = 8
+        if self.vel.y < 0:    drawIndex = 8
         elif self.vel.y > 0:    drawIndex = 9
         if (self.kickTimer > 0 and not self.holdingDown) or self.horizontalKicking or self.kickedEnemyTimer > 0:
             drawIndex = 10
@@ -78,6 +92,11 @@ class Player(Entity):
             win.blit(pygame.transform.flip(self.imgs[drawIndex], self.dir == -1, False), self.pos-scroll-(2, 0))
 
         self.waterParticles.draw(win, scroll)
+
+        if self.currentText != None:
+            x = self.pos.x + self.width * 0.5 - scroll.x - self.currentText.get_width() * 0.5
+            x = min(max(x, 0), win.get_width())
+            win.blit(self.currentText, (x, self.pos.y - scroll.y - 2 * self.currentText.get_height()))
 
         # Draw kick hitbox
         #if self.kickTimer > 0:
@@ -93,6 +112,16 @@ class Player(Entity):
 
         self.idleAnim.update(delta)
         self.runAnim.update(delta)
+
+        if self.textTimer <= 0:
+            if len(self.textQueue) > 0:
+                item = self.textQueue.pop(0)
+                self.currentText = self.text.createTextSurf(item[0])
+                self.textTimer = item[1]
+            elif self.currentText is not None:
+                self.currentText = None
+        else:
+            self.textTimer -= delta
         
         keys = pygame.key.get_pressed()
 
@@ -153,6 +182,9 @@ class Player(Entity):
 
         if event.key == pygame.K_z:# and self.collisionDir & 0b0010 <= 0:
             self.kickTimer = 0.2
+        
+        if event.key == pygame.K_t:
+            self.displayText(str(time.time()))
 
     def keyup(self, event):
         if event.key == pygame.K_c:

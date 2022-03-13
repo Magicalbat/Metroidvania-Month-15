@@ -107,6 +107,8 @@ class Boss(Entity):
                 if tilemap.collidePoint(self.projectiles[i].pos):
                     self.projectiles.pop(i)
 
+        self.vel.x = self.speed * self.dir
+
         if self.phase == 1 and self.center.distance_squared_to(player.center) < 62500: # Radius: 250
             if self.shootTimer <= 0:
                 self.shootTimer = self.shootRate
@@ -118,7 +120,7 @@ class Boss(Entity):
             if self.enemySpawnTimer <= 0:
                 self.enemySpawnTimer = 5
                 self.spawnEnemy = True
-                if random.random() > 0.67:  self.enemySpawnType = "GroundEnemies"
+                if random.random() > 0.75:  self.enemySpawnType = "GroundEnemies"
                 else:   self.enemySpawnType = "SlowEnemies"
                 self.enemySpawnPos = self.center
                 self.enemySpawnDir = ((self.pos.x + self.width*0.5) < (player.pos.x + player.width*0.5)) * 2 - 1

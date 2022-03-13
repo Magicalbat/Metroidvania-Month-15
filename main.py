@@ -15,7 +15,7 @@ def main():
     clock = pygame.time.Clock()
     fps = 60
 
-    screenManager = ScreenManager(Level("res/levels/output.json"))
+    screenManager = ScreenManager(Level("res/levels/bosslevel.json"))
     
     running = True
     while running:

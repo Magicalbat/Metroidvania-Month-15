@@ -1,6 +1,6 @@
 import pygame
 
-from scripts.common import *
+from src.utils.common import swapImgColor
 
 class Text():
     def __init__(self):

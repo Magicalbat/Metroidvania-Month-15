@@ -16,8 +16,8 @@ from src.utils.specialtiles import SpecialTileManager
 from src.utils.common import *
 
 class Level(GameScreen):
-    def __init__(self, filepath="res/levels/level0.json"):
-        tileImgs = loadSpriteSheet("res/imgs/metaltiles.png", (16,16), (4,4), (1,1), 16, (0,0,0))
+    def __init__(self, filepath="res/levels/level0.json", player=None):
+        tileImgs = loadSpriteSheet("res/imgs/labtiles.png", (16,16), (5,5), (1,1), 25, (0,0,0))
         self.tilemap = Tilemap(16, tileImgs)
         extraData = self.tilemap.loadLevel(filepath)
 
@@ -25,13 +25,24 @@ class Level(GameScreen):
 
         self.processExtraData(extraData)
 
+        if player is not None:
+            self.player = player
+            self.player.pos = self.playerSpawn
+            self.player.updateRectPos()
+
     def setup(self, screenManager):
         super().setup(screenManager)
 
         if hasattr(self, "player"):
-            self.player = Player(self.playerSpawn, 12, 16, images=self.player.imgs)
+            self.player.vel = Vector2(0, 0)
+            self.player.pos = copy.deepcopy(self.playerSpawn)
+            self.player.updateRectPos()
+            #self.player = Player(self.playerSpawn, 12, 16, images=self.player.imgs, text=self.player.text)
         else:
             self.player = Player(self.playerSpawn, 12, 16)
+            self.player.displayText("Left and right to move")
+            self.player.displayText("C to jump")
+
         self.enemyManager.setup()
         self.specialTileManager.setup()
 
@@ -57,8 +68,10 @@ class Level(GameScreen):
         #self.tilemap.drawCollision(win, self.camera.scroll)
         self.specialTileManager.draw(win, self.camera.scroll)
 
-        self.player.draw(win, self.camera.scroll)
         self.enemyManager.draw(win, self.camera.scroll)
+        self.player.draw(win, self.camera.scroll)
+
+        #pygame.draw.rect(win, (255,0,0), (self.playerSpawn-self.camera.scroll, (16,16)))
 
         col = (0,255,0) if self.player.acid else (0,0,255)
         pygame.draw.rect(win, col, (2,2,10,10))
