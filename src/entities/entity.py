@@ -39,6 +39,10 @@ class Entity:
     def updateRectDim(self):
         self.rect.w = self.width
         self.rect.h = self.height
+    
+    def updateRect(self):
+        self.updateRectPos()
+        self.updateRectDim()
 
     @property
     def center(self):
@@ -47,6 +51,7 @@ class Entity:
     def update(self, delta, tilemap=None, colRects=None):
         if self.applyGravity:
             self.vel.y += self.gravity * delta
+            self.vel.y = min(self.vel.y, 200)
         if self.applyCollision:
             if colRects is None:    colRects = []
             if tilemap is not None:

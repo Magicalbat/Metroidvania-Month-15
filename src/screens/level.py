@@ -60,8 +60,8 @@ class Level(GameScreen):
         self.player.draw(win, self.camera.scroll)
         self.enemyManager.draw(win, self.camera.scroll)
 
-        for dl in self.doorLocks:
-            pygame.draw.rect(win, (255,255,255), self.camera.scrollRect(dl))
+        col = (0,255,0) if self.player.acid else (0,0,255)
+        pygame.draw.rect(win, col, (2,2,10,10))
 
     def update(self, delta):
         self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects()+self.specialTileManager.getColRects())
@@ -98,10 +98,5 @@ class Level(GameScreen):
                 cameraTriggerRects.append(pygame.Rect(p1, p2-p1))
                 cameraTriggerVectors.append((p1, p2))
         self.camera = Camera(cameraTriggerRects, cameraTriggerVectors)
-
-        self.doorLocks = []
-        if "DoorLock" in extraData:
-            for pos in extraData["DoorLock"]:
-                self.doorLocks.append(pygame.Rect(pos, (self.tilemap.tileSize, self.tilemap.tileSize)))
 
         self.specialTileManager = SpecialTileManager(extraData)

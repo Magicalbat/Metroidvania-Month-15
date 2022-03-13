@@ -73,27 +73,11 @@ def enemy(cls):
             if self.damageTimer > 0:    self.damageTimer -= delta
     return EnemyWrapper
 
+from src.entities.projectile import Projectile
+
 @enemy
 class FlyingEnemy:
     # No states, dumb enemy
-
-    class Projectile:
-        def __init__(self, pos, target, r=2):
-            self.pos = pos
-
-            speed = 16*6
-
-            dirVec = target - pos
-            self.vel = speed * dirVec.normalize()
-            #self.angle = math.atan2(dirVec.y, dirVec.x)
-
-            self.r = r
-        
-        def draw(self, win, scroll):
-            pygame.draw.rect(win, (255,255,255), (self.pos.x-self.r-scroll.x, self.pos.y-self.r-scroll.y, self.r+self.r, self.r+self.r))
-        
-        def update(self, delta):
-            self.pos += self.vel * delta
 
     def __init__(self, enemy, **kwargs):
         enemy.applyGravity = False

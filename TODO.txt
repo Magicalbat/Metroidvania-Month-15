@@ -1,7 +1,5 @@
-- Enemy rush thing
 - Boss
 - New level transition system (just edit the level files directly)
-- Art
 - Levels
 - Sound
 - Make/Find music
