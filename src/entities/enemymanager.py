@@ -2,8 +2,9 @@ import pygame
 from pygame.math import Vector2
 
 from src.utils.common import loadSpriteSheet
-from src.entities.enemy import *
+import src.screens
 from src.entities.boss import Boss
+from src.entities.enemy import *
 
 class EnemyManager:
     enemyTypes = {
@@ -25,7 +26,7 @@ class EnemyManager:
             if enemyType in extraData:
                 self.enemySpawns[enemyType] = extraData[enemyType]
         
-        if "Boss" in extraData:
+        if "Boss" in extraData and len(extraData["Boss"]) > 0:
             self.enemySpawns["Boss"] = extraData["Boss"][0]
         self.bossDamagePoints = []
         if "BossDamagePoints" in extraData:
@@ -48,6 +49,8 @@ class EnemyManager:
         
         self.bossDamageRects = [pygame.Rect(pos, (16, 16)) for pos in self.bossDamagePoints]
         self.bossDamageProgress = [16 for _ in self.bossDamageRects]
+
+        self.newScreen = None
 
     def draw(self, win, scroll):
         if self.boss is not None:
@@ -116,6 +119,7 @@ class EnemyManager:
             
             if self.boss is None:
                 self.enemies = []
+                self.newScreen = src.screens.textscreen.TextScreen("res/levels/wintext.json")
 
         for enemy in self.enemies:
             enemy.onScreen = enemy.rect.colliderect(screenRect)

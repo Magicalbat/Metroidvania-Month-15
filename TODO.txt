@@ -1,4 +1,3 @@
-- Boss
 - New level transition system (just edit the level files directly)
 - Levels
 - Sound

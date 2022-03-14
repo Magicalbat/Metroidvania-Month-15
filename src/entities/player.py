@@ -95,7 +95,7 @@ class Player(Entity):
 
         if self.currentText != None:
             x = self.pos.x + self.width * 0.5 - scroll.x - self.currentText.get_width() * 0.5
-            x = min(max(x, 0), win.get_width())
+            x = min(max(x, 0), win.get_width()-self.currentText.get_width())
             win.blit(self.currentText, (x, self.pos.y - scroll.y - 2 * self.currentText.get_height()))
 
         # Draw kick hitbox

@@ -16,7 +16,7 @@ from src.utils.specialtiles import SpecialTileManager
 from src.utils.common import *
 
 class Level(GameScreen):
-    def __init__(self, filepath="res/levels/level0.json", player=None):
+    def __init__(self, filepath="res/levels/level0.json", **kwargs):
         tileImgs = loadSpriteSheet("res/imgs/labtiles.png", (16,16), (5,5), (1,1), 25, (0,0,0))
         self.tilemap = Tilemap(16, tileImgs)
         extraData = self.tilemap.loadLevel(filepath)
@@ -25,8 +25,8 @@ class Level(GameScreen):
 
         self.processExtraData(extraData)
 
-        if player is not None:
-            self.player = player
+        if "player" in kwargs:
+            self.player = kwargs["player"] 
             self.player.pos = self.playerSpawn
             self.player.updateRectPos()
 
@@ -37,6 +37,8 @@ class Level(GameScreen):
             self.player.vel = Vector2(0, 0)
             self.player.pos = copy.deepcopy(self.playerSpawn)
             self.player.updateRectPos()
+            self.player.textQueue = []
+            self.player.currentText = None
             #self.player = Player(self.playerSpawn, 12, 16, images=self.player.imgs, text=self.player.text)
         else:
             self.player = Player(self.playerSpawn, 12, 16)
@@ -80,6 +82,8 @@ class Level(GameScreen):
         self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects()+self.specialTileManager.getColRects())
 
         self.enemyManager.update(delta, self.tilemap, self.player, self.screenRect, self.playerSpawn)
+        if self.enemyManager.newScreen is not None:
+            self.screenManager.changeScreen(self.enemyManager.newScreen)
 
         self.specialTileManager.update(delta, self.player)
 
@@ -88,6 +92,10 @@ class Level(GameScreen):
 
         if self.awaitingSpawnTimer > 0:
             self.awaitingSpawnTimer -= delta
+        
+        for lc in self.levelChanges:
+            if lc[0].colliderect(self.player.rect):
+                self.screenManager.changeScreen(Level(lc[1], player=self.player))
 
     def keydown(self, event):
         self.player.keydown(event)
@@ -97,7 +105,7 @@ class Level(GameScreen):
     def keyup(self, event):
         self.player.keyup(event)
 
-    def processExtraData(self, extraData):
+    def processExtraData(self, extraData, returnIndex=-1):
         self.playerSpawn = Vector2(0,0)
         if "PlayerSpawn" in extraData:
             self.playerSpawn = Vector2(extraData["PlayerSpawn"][0][0], extraData["PlayerSpawn"][0][1] - 16)
@@ -111,5 +119,18 @@ class Level(GameScreen):
                 cameraTriggerRects.append(pygame.Rect(p1, p2-p1))
                 cameraTriggerVectors.append((p1, p2))
         self.camera = Camera(cameraTriggerRects, cameraTriggerVectors)
+
+        self.levelChanges = []
+        if "ToLevel" in extraData:
+            for item in extraData["ToLevel"]:
+                self.levelChanges.append((
+                    pygame.Rect(item["Pos"], (16, 16)),
+                    item["LevelPath"], item["Index"]
+                ))
+
+        if returnIndex >= 0:
+            if "FromLevel" in extraData:
+                pos = extraData["FromLevel"][returnIndex]
+                self.playerSpawn = Vector2(pos[0], pos[1] - 16)
 
         self.specialTileManager = SpecialTileManager(extraData)

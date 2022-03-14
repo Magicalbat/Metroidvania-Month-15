@@ -423,7 +423,7 @@
     "extraData": {
         "PlayerSpawn": [
             [
-                48,
+                64,
                 368
             ]
         ],
@@ -510,6 +510,11 @@
             ]
         ],
         "ToLevel": [],
-        "FromLevel": []
+        "FromLevel": [
+            [
+                48,
+                368
+            ]
+        ]
     }
 }

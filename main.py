@@ -3,6 +3,7 @@ from pygame.math import Vector2
 
 from src.screens.screenmanager import ScreenManager
 from src.screens.level import Level 
+from src.screens.textscreen import TextScreen
 
 def main():
     pygame.init()
@@ -15,7 +16,7 @@ def main():
     clock = pygame.time.Clock()
     fps = 60
 
-    screenManager = ScreenManager(Level("res/levels/bosslevel.json"))
+    screenManager = ScreenManager(TextScreen("res/levels/texttest.json"))
     
     running = True
     while running:
