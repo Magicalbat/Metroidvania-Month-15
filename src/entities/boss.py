@@ -39,6 +39,10 @@ class Boss(Entity):
         self.enemySpawnType = "GroundEnemies"
         self.enemySpawnPos = (0, 0)
         self.enemySpawnDir = 1
+
+        self.damageSurf = pygame.Surface((self.width + 2, self.height + 2)).convert()
+        self.damageSurf.fill((255,0,0))
+        self.damageSurf.set_alpha(128)
     
     def collide(self, other : pygame.Rect):
         for proj in self.projectiles:
@@ -66,6 +70,10 @@ class Boss(Entity):
                 self.width *= 2
                 self.height *= 2
                 self.updateRect()
+
+                self.damageSurf = pygame.Surface((self.damageSurf.get_width() * 2, self.damageSurf.get_height() * 2))
+                self.damageSurf.fill((255,0,0))
+                self.damageSurf.set_alpha(128)
         return True
     
     def draw(self, win, scroll):
@@ -83,6 +91,9 @@ class Boss(Entity):
 
         scale = 2**self.phase
         win.blit(pygame.transform.scale(pygame.transform.flip(self.imgs[drawIndex], self.dir == -1, False), (16*scale, 16*scale)), self.pos-scroll+(-2*scale, 0))
+
+        if self.damageTimer > 0:
+            win.blit(self.damageSurf, self.pos-scroll+(-scale, -scale))
 
         for proj in self.projectiles:
             proj.draw(win, scroll)

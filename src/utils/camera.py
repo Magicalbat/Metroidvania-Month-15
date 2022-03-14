@@ -14,11 +14,13 @@ class Camera:
         self.prevTarget = -1
         self.changedTarget = False
 
+        self.smoothing = 10
+
     def scrollRect(self, r):
         return pygame.Rect(r.x - self.scroll.x, r.y - self.scroll.y, r.w, r.h)
 
     def update(self, e : Entity, winDim):
-        self.scroll += ((e.center - Vector2(winDim)*0.5) - self.scroll) / 10
+        self.scroll += ((e.center - Vector2(winDim)*0.5) - self.scroll) / self.smoothing
 
         col = e.rect.collidelist(self.triggerRects)
         if col > -1:    self.targetIndex = col
@@ -36,3 +38,6 @@ class Camera:
         self.scroll.x = max(self.bounds[0].x, self.scroll.x)
         self.scroll.y = min(self.bounds[1].y-winDim[1], self.scroll.y)
         self.scroll.y = max(self.bounds[0].y, self.scroll.y)
+
+    def snap(self, target, winDim):
+        self.scroll = (target - Vector2(winDim)*0.5)

@@ -44,6 +44,10 @@ class Level(GameScreen):
             self.player = Player(self.playerSpawn, 12, 16)
             self.player.displayText("Left and right to move")
             self.player.displayText("C to jump")
+            self.player.displayText("Hold X to spray water", 8)
+            self.player.displayText("Green acid will kill you", 8)
+            self.player.displayText("Your water can freeze enemies", 7)
+            self.player.displayText("Have fun!")
 
         self.enemyManager.setup()
         self.specialTileManager.setup()
@@ -70,13 +74,14 @@ class Level(GameScreen):
         #self.tilemap.drawCollision(win, self.camera.scroll)
         self.specialTileManager.draw(win, self.camera.scroll)
 
+        for pickup in self.pickups:
+            r = pickup[0]
+            pygame.draw.rect(win, (0,255,255), (r.topleft-self.camera.scroll, (r.w, r.h)))
+
         self.enemyManager.draw(win, self.camera.scroll)
         self.player.draw(win, self.camera.scroll)
 
         #pygame.draw.rect(win, (255,0,0), (self.playerSpawn-self.camera.scroll, (16,16)))
-
-        col = (0,255,0) if self.player.acid else (0,0,255)
-        pygame.draw.rect(win, col, (2,2,10,10))
 
     def update(self, delta):
         self.player.update(delta, self.tilemap, self.enemyManager, self.enemyManager.getStunnedRects()+self.specialTileManager.getColRects())
@@ -97,10 +102,13 @@ class Level(GameScreen):
             if lc[0].colliderect(self.player.rect):
                 self.screenManager.changeScreen(Level(lc[1], player=self.player))
 
+        for i in range(len(self.pickups))[::-1]:
+            if self.pickups[i][0].colliderect(self.player.rect):
+                self.player.addPickup(self.pickups[i][1])
+                self.pickups.pop(i)
+
     def keydown(self, event):
         self.player.keydown(event)
-        if event.key == pygame.K_a:
-            self.player.toggleAcid()
 
     def keyup(self, event):
         self.player.keyup(event)
@@ -132,5 +140,13 @@ class Level(GameScreen):
             if "FromLevel" in extraData:
                 pos = extraData["FromLevel"][returnIndex]
                 self.playerSpawn = Vector2(pos[0], pos[1] - 16)
+
+        self.pickups = []
+        if "Pickup" in extraData:
+            for item in extraData["Pickup"]:
+                self.pickups.append((
+                    pygame.Rect(item["Pos"], (16, 16)),
+                    item["Type"]
+                ))
 
         self.specialTileManager = SpecialTileManager(extraData)

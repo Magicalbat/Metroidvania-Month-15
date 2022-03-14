@@ -16,6 +16,7 @@ def enemy(cls):
             self.applyGravity, self.applyCollision = True, True
             
             self.stunTimer = 0
+            self.startStunTime = 0
             self.damageTimer = 0
             self.maxHealth = 5
             self.health = self.maxHealth
@@ -25,6 +26,10 @@ def enemy(cls):
             self.onScreen = False
 
             self.decoratorObj = cls(self, **kwargs)
+
+            self.indicationSurf = pygame.Surface((self.width+2, self.height+2)).convert()
+            self.indicationSurf.fill((0,245,255))
+            self.indicationSurf.set_alpha(128)
 
             if hasattr(self.decoratorObj, "collide"):
                 self.collide = self.childCollide
@@ -38,7 +43,9 @@ def enemy(cls):
             return self.decoratorObj.collide(self.rect, rect)
     
         def stun(self, time):
+            self.startStunTime = time
             self.stunTimer = time
+            self.indicationSurf.fill((0,245,255))
         
         def kick(self, vel):
             self.stunTimer = 0
@@ -50,6 +57,9 @@ def enemy(cls):
             if self.damageTimer <= 0:
                 self.health -= amt
                 self.damageTimer = 0.5
+                
+                self.indicationSurf.fill((255,0,0))
+                self.indicationSurf.set_alpha(128)
             return self.health > 0
         
         def draw(self, win, scroll):
@@ -58,6 +68,12 @@ def enemy(cls):
                 pygame.draw.rect(win, (255,0,0), r)
                 pygame.draw.rect(win, (0,255,0), (r.x, r.y, r.w * (self.health/self.maxHealth), r.h))
             self.decoratorObj.draw(win, self, scroll)
+
+            if self.stunTimer > 0:
+                self.indicationSurf.set_alpha(64 + 128 * (self.stunTimer / self.startStunTime))
+                win.blit(self.indicationSurf, self.pos-scroll+(-1, -1))
+            elif self.damageTimer > 0:
+                win.blit(self.indicationSurf, self.pos-scroll+(-1, -1))
         
         def update(self, delta, player, tilemap=None, colRects=None):
             if self.stunTimer <= 0:
@@ -277,6 +293,9 @@ class SlowEnemy:
 
     def update(self, delta, enemy, player, tilemap):
         self.anim.update(delta)
+        enemy.vel.x = self.speed * self.dir
         if enemy.collisionDir & 0b0100 > 0 or enemy.collisionDir & 0b0001 > 0:
             self.dir *= -1
             enemy.vel.x = self.speed * self.dir
+            enemy.pos.x += enemy.vel.x * 2 * delta
+            enemy.updateRectPos()

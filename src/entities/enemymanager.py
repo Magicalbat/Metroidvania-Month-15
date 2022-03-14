@@ -102,7 +102,7 @@ class EnemyManager:
                             if self.boss.phase == 1:
                                 player.displayText("The shrink ray is wearing off!", 2)
                     else:
-                        player.displayText("I'll have to find another way to damage it")
+                        player.displayText("I could go up to break its invincibility")
                 for i in range(len(self.bossDamageProgress))[::-1]:
                     if player.waterParticles.collideRect(self.bossDamageRects[i]):
                         self.bossDamageProgress[i] -= 0.25
@@ -114,6 +114,8 @@ class EnemyManager:
                             player.updateRectPos()
                             player.textQueue = []
                             player.currentText = None
+
+                            player.displayText("Now I can damage it", 4)
 
                             self.boss.invincible = False
             
@@ -129,6 +131,8 @@ class EnemyManager:
             if self.enemies[i].onScreen:#screenRect.colliderect(self.enemies[i].rect):
                 if player.waterParticles.collideRect(self.enemies[i].rect):
                     if player.acid:
+                        if self.enemies[i].damageTimer <= 0:
+                            self.enemies[i].kick(player.dir * 75)
                         if not self.enemies[i].damage(1):
                             self.enemies.pop(i)
                     else:

@@ -47,6 +47,9 @@ class Player(Entity):
             (0,245,255), (0,128,255), (0,225,225),
         ])
 
+        self.hasAcid = True
+        self.hasKick = True
+
         self.dir = 1
         self.holdingDown = False
 
@@ -64,20 +67,29 @@ class Player(Entity):
         if (text, time) not in self.textQueue:
             self.textQueue.append((text, time))
 
+    def addPickup(self, pickup):
+        if pickup == "Acid":
+            self.hasAcid = True
+            self.displayText("Press A to toggle between water and acid")
+        elif pickup == "Kick":
+            self.hasKick = True
+            self.displayText("Press Z to kick")
+
     def toggleAcid(self):
-        if self.acid:
-            self.acid = False
-            self.waterParticles.clear()
-            self.waterParticles.colors = [
-                (0,0,255), (0,0,225), (0,0,200),
-                (0,245,255), (0,128,255), (0,225,225),
-            ]
-        else:
-            self.acid = True
-            self.waterParticles.clear()
-            self.waterParticles.colors = [
-                (0,255,0), (0,225,0), (0,220,100)
-            ]
+        if self.hasAcid:
+            if self.acid:
+                self.acid = False
+                self.waterParticles.clear()
+                self.waterParticles.colors = [
+                    (0,0,255), (0,0,225), (0,0,200),
+                    (0,245,255), (0,128,255), (0,225,225),
+                ]
+            else:
+                self.acid = True
+                self.waterParticles.clear()
+                self.waterParticles.colors = [
+                    (0,255,0), (0,225,0), (0,220,100)
+                ]
 
     def draw(self, win, scroll):
         drawIndex = int(self.idleAnim.value)
@@ -97,6 +109,10 @@ class Player(Entity):
             x = self.pos.x + self.width * 0.5 - scroll.x - self.currentText.get_width() * 0.5
             x = min(max(x, 0), win.get_width()-self.currentText.get_width())
             win.blit(self.currentText, (x, self.pos.y - scroll.y - 2 * self.currentText.get_height()))
+
+        if self.hasAcid:
+            col = (0,255,0) if self.acid else (0,0,255)
+            pygame.draw.rect(win, col, (2,2,10,10))
 
         # Draw kick hitbox
         #if self.kickTimer > 0:
@@ -143,10 +159,10 @@ class Player(Entity):
         if self.horizontalKicking:
             if self.collisionDir & 0b0010 > 0 or abs(self.vel.x) < 100:
                 self.horizontalKicking = False
-            
+                
         if self.kickTimer > 0:
             self.kickTimer -= delta
-            self.holdingDown = keys[pygame.K_DOWN]
+            self.holdingDown = keys[pygame.K_DOWN]# and (self.collisionDir & 0b0010 > 0 or (not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]))
             if self.holdingDown:
                 r = pygame.Rect(self.pos.x, self.pos.y + self.height, self.width, self.height/2)
                 if r.collidelist(tilemap.getRectColRects(r)) != -1 or r.collidelist(colRects) != -1:
@@ -180,11 +196,11 @@ class Player(Entity):
             if self.collisionDir & 0b0010 > 0:
                 self.vel.y = self.maxJumpVel
 
-        if event.key == pygame.K_z:# and self.collisionDir & 0b0010 <= 0:
+        if self.hasKick and event.key == pygame.K_z:# and self.collisionDir & 0b0010 <= 0:
             self.kickTimer = 0.2
-        
-        if event.key == pygame.K_t:
-            self.displayText(str(time.time()))
+
+        if event.key == pygame.K_a:
+            self.toggleAcid()
 
     def keyup(self, event):
         if event.key == pygame.K_c:
