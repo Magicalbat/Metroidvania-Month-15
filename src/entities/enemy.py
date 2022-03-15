@@ -58,7 +58,6 @@ def enemy(cls):
                 self.health -= amt
                 self.damageTimer = 0.5
                 
-                self.indicationSurf.fill((255,0,0))
                 self.indicationSurf.set_alpha(128)
             return self.health > 0
         
@@ -72,7 +71,11 @@ def enemy(cls):
             if self.stunTimer > 0:
                 self.indicationSurf.set_alpha(64 + 128 * (self.stunTimer / self.startStunTime))
                 win.blit(self.indicationSurf, self.pos-scroll+(-1, -1))
+            elif self.damageTimer > 0.25:
+                self.indicationSurf.fill((255,0,0))
+                win.blit(self.indicationSurf, self.pos-scroll+(-1, -1))
             elif self.damageTimer > 0:
+                self.indicationSurf.fill((255,255,255))
                 win.blit(self.indicationSurf, self.pos-scroll+(-1, -1))
         
         def update(self, delta, player, tilemap=None, colRects=None):

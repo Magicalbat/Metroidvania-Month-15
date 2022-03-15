@@ -1,3 +1,7 @@
+import pygame
+
+from src.audiosettings import AudioSettings
+
 class GameScreen:
     def __init__(self):    pass
     def setup(self, screenManager):
@@ -24,7 +28,15 @@ class ScreenManager:
         self.curScreen.draw(win)
     def update(self, delta):
         self.curScreen.update(delta)
+        
     def keydown(self, event):
+        if event.key == pygame.K_m:
+            AudioSettings().sfx = not AudioSettings().sfx
+            if pygame.mixer.music.get_busy():
+                pygame.mixer.music.pause()
+            else:
+                pygame.mixer.music.unpause()
+
         self.curScreen.keydown(event)
     def keyup(self, event):
         self.curScreen.keyup(event)

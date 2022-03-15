@@ -5,7 +5,19 @@ from src.screens.screenmanager import ScreenManager
 from src.screens.level import Level 
 from src.screens.textscreen import TextScreen
 
+"""
+
+Song Credit - 
+https://opengameart.org/content/tower-defense-theme
+https://opengameart.org/users/dst
+
+Sound Credit - 
+https://opengameart.org/content/rage-mode
+
+"""
+
 def main():
+    pygame.mixer.pre_init(44100, -16, 2, 512)
     pygame.init()
 
     width = 320
@@ -15,6 +27,11 @@ def main():
 
     clock = pygame.time.Clock()
     fps = 60
+
+    pygame.mixer.music.load("res/sound/DST-TowerDefenseTheme.mp3")
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.pause()
 
     screenManager = ScreenManager(Level("res/levels/level 0.json"))#TextScreen("res/levels/texttest.json"))
     

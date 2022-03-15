@@ -6,6 +6,8 @@ import src.screens
 from src.entities.boss import Boss
 from src.entities.enemy import *
 
+from src.audiosettings import AudioSettings
+
 class EnemyManager:
     enemyTypes = {
         "GroundEnemies": GroundEnemy,
@@ -33,6 +35,9 @@ class EnemyManager:
             self.bossDamagePoints = extraData["BossDamagePoints"]
         
         self.imgs = loadSpriteSheet("res/imgs/enemies.png", (16,16), (3,4), (1,1), 12, (0,0,0))
+
+        self.deathSound = pygame.mixer.Sound("res/sound/death.wav")
+        self.rageSound = pygame.mixer.Sound("res/sound/rage.wav")
 
     def setup(self):
         self.reset = False
@@ -107,6 +112,9 @@ class EnemyManager:
                     if player.waterParticles.collideRect(self.bossDamageRects[i]):
                         self.bossDamageProgress[i] -= 0.25
                         if self.bossDamageProgress[i] < 3:
+                            if AudioSettings().sfx:
+                                self.rageSound.play()
+
                             self.bossDamageRects.pop(i)
                             self.bossDamageProgress.pop(i)
 
@@ -134,6 +142,8 @@ class EnemyManager:
                         if self.enemies[i].damageTimer <= 0:
                             self.enemies[i].kick(player.dir * 75)
                         if not self.enemies[i].damage(1):
+                            if AudioSettings().sfx:
+                                self.deathSound.play()
                             self.enemies.pop(i)
                     else:
                         self.enemies[i].stun(1)

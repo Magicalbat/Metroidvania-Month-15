@@ -1,13 +1,15 @@
 import pygame
 from pygame.math import Vector2
 
-import math, time
+import math
 
 from src.entities.entity import Entity
 from src.utils.particles import Particles
 from src.utils.animation import Animation
 from src.utils.text import Text
 from src.utils.common import loadSpriteSheet
+
+from src.audiosettings import AudioSettings
 
 class Player(Entity):
     def __init__(self, *args, **kwargs):
@@ -29,6 +31,12 @@ class Player(Entity):
         self.idleAnim = Animation((0,4), 6, realTime=True)
         self.runAnim = Animation((4,8), 10, realTime=True)
 
+        self.jumpSound = pygame.mixer.Sound("res/sound/jump.wav")
+        self.kickSound = pygame.mixer.Sound("res/sound/kick.wav")
+        self.kickSound.set_volume(2)
+
+        self.jumpPressTimer = 0
+
         self.speed = 16*5
         self.accel = 8
         self.airFriction = 0.93
@@ -47,8 +55,8 @@ class Player(Entity):
             (0,245,255), (0,128,255), (0,225,225),
         ])
 
-        self.hasAcid = False
-        self.hasKick = False
+        self.hasAcid = True
+        self.hasKick = True
 
         self.dir = 1
         self.holdingDown = False
@@ -142,6 +150,13 @@ class Player(Entity):
         else:
             self.textTimer -= delta
         
+        if self.jumpPressTimer > 0:
+            if self.collisionDir & 0b0010 > 0:
+                if AudioSettings().sfx:
+                    self.jumpSound.play()
+                self.vel.y = self.maxJumpVel
+            self.jumpPressTimer -= delta
+        
         keys = pygame.key.get_pressed()
 
         if self.collisionDir & 0b0010 > 0:
@@ -171,6 +186,8 @@ class Player(Entity):
                 if r.collidelist(tilemap.getRectColRects(r)) != -1 or r.collidelist(colRects) != -1:
                     self.vel.y = -self.kickPower.y
                     self.kickTimer = 0
+                    if AudioSettings().sfx:
+                        self.kickSound.play()
             else:
                 r = pygame.Rect(self.pos.x + self.width*self.dir, self.pos.y, self.width, self.height)
                 if r.collidelist(tilemap.getRectColRects(r)) != -1 or r.collidelist(colRects) != -1:
@@ -178,12 +195,16 @@ class Player(Entity):
                     self.kickTimer = 0
                     self.horizontalKicking = True
                     self.kickDir = self.dir
+                    if AudioSettings().sfx:
+                        self.kickSound.play()
                 for enemy in enemyManager.enemies:
                     if r.colliderect(enemy.rect):
                         enemy.kick(self.kickPower.x * self.dir)
                         self.kickTimer = 0
                         self.kickedEnemyTimer = 0.2
                         self.kickDir = self.dir
+                        if AudioSettings().sfx:
+                            self.kickSound.play()
         if self.kickedEnemyTimer > 0:    self.kickedEnemyTimer -= delta
 
         if keys[pygame.K_x]:
@@ -196,12 +217,11 @@ class Player(Entity):
 
     def keydown(self, event):
         if event.key == pygame.K_c:
-            if self.collisionDir & 0b0010 > 0:
-                self.vel.y = self.maxJumpVel
+            self.jumpPressTimer = 0.1
 
         if self.hasKick and event.key == pygame.K_z:# and self.collisionDir & 0b0010 <= 0:
             self.kickTimer = 0.2
-
+        
         if event.key == pygame.K_a:
             self.toggleAcid()
 

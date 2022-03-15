@@ -92,7 +92,11 @@ class Boss(Entity):
         scale = 2**self.phase
         win.blit(pygame.transform.scale(pygame.transform.flip(self.imgs[drawIndex], self.dir == -1, False), (16*scale, 16*scale)), self.pos-scroll+(-2*scale, 0))
 
-        if self.damageTimer > 0:
+        if self.damageTimer > 0.25:
+            self.damageSurf.fill((255,0,0))
+            win.blit(self.damageSurf, self.pos-scroll+(-scale, -scale))
+        elif self.damageTimer > 0:
+            self.damageSurf.fill((255,255,255))
             win.blit(self.damageSurf, self.pos-scroll+(-scale, -scale))
 
         for proj in self.projectiles:
