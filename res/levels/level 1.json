@@ -3651,22 +3651,22 @@
             },
             {
                 "Pos" : [-384, -1024],
-                "LevelPath" : "res/levels/bosslevel.json",
+                "LevelPath" : "res/levels/level 2.json",
                 "Index" : 0
             },
             {
                 "Pos" : [-384, -1008],
-                "LevelPath" : "res/levels/bosslevel.json",
+                "LevelPath" : "res/levels/level 2.json",
                 "Index" : 0
             },
             {
                 "Pos" : [-384, -992],
-                "LevelPath" : "res/levels/bosslevel.json",
+                "LevelPath" : "res/levels/level 2.json",
                 "Index" : 0
             },
             {
                 "Pos" : [-384, -976],
-                "LevelPath" : "res/levels/bosslevel.json",
+                "LevelPath" : "res/levels/level 2.json",
                 "Index" : 0
             }
         ],

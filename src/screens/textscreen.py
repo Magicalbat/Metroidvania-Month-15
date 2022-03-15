@@ -17,7 +17,7 @@ class TextScreen(GameScreen):
 
         self.nextDisplay = self.text.createTextSurf("Press any key to continue")
 
-        self.text.loadFontImg("res/imgs/text.png", scale=(2,2))
+        #self.text.loadFontImg("res/imgs/text.png", scale=(2,2))
         
     def setup(self, screenManager):
         super().setup(screenManager)

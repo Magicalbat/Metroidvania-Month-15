@@ -55,8 +55,8 @@ class Player(Entity):
             (0,245,255), (0,128,255), (0,225,225),
         ])
 
-        self.hasAcid = True
-        self.hasKick = True
+        self.hasAcid = False 
+        self.hasKick = False
 
         self.dir = 1
         self.holdingDown = False

@@ -31,9 +31,8 @@ def main():
     pygame.mixer.music.load("res/sound/DST-TowerDefenseTheme.mp3")
     pygame.mixer.music.set_volume(0.2)
     pygame.mixer.music.play(-1)
-    pygame.mixer.music.pause()
 
-    screenManager = ScreenManager(Level("res/levels/level 0.json"))#TextScreen("res/levels/texttest.json"))
+    screenManager = ScreenManager(TextScreen("res/levels/starttext.json"))
     
     running = True
     while running:
