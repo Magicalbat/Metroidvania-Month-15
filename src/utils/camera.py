@@ -31,8 +31,12 @@ class Camera:
             
         self.prevTarget = self.targetIndex
         
-        self.bounds[0] = self.bounds[0].lerp(self.triggerVectors[self.targetIndex][0], 0.075)
-        self.bounds[1] = self.bounds[1].lerp(self.triggerVectors[self.targetIndex][1], 0.075)
+        if self.smoothing > 1:
+            self.bounds[0] = self.bounds[0].lerp(self.triggerVectors[self.targetIndex][0], 0.075)
+            self.bounds[1] = self.bounds[1].lerp(self.triggerVectors[self.targetIndex][1], 0.075)
+        else:
+            self.bounds[0] = self.triggerVectors[self.targetIndex][0]
+            self.bounds[1] = self.triggerVectors[self.targetIndex][1]
         
         self.scroll.x = min(self.bounds[1].x-winDim[0], self.scroll.x)
         self.scroll.x = max(self.bounds[0].x, self.scroll.x)

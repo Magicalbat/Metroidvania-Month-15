@@ -47,8 +47,8 @@ class Player(Entity):
             (0,245,255), (0,128,255), (0,225,225),
         ])
 
-        self.hasAcid = True
-        self.hasKick = True
+        self.hasAcid = False
+        self.hasKick = False
 
         self.dir = 1
         self.holdingDown = False
@@ -74,6 +74,9 @@ class Player(Entity):
         elif pickup == "Kick":
             self.hasKick = True
             self.displayText("Press Z to kick")
+            self.displayText("Hold DOWN and Z to kick off of the ground", 6)
+            self.displayText("You can kick enemies away", 6)
+            self.displayText("You can also kick off the wall and frozen enemies", 6)
 
     def toggleAcid(self):
         if self.hasAcid:

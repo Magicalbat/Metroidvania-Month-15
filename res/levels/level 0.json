@@ -855,29 +855,29 @@
         "BossDamagePoints": [],
         "ToLevel": [
             {
-                "Pos" : [ 1360, 160 ],
-                "LevelPath" : "res/levels/bosslevel.json",
+                "Pos" : [ 1220, 144 ],
+                "LevelPath" : "res/levels/level 1.json",
                 "Index" : 0
             },
             {
-                "Pos" : [ 1360, 144 ],
-                "LevelPath" : "res/levels/bosslevel.json",
+                "Pos" : [ 1220, 160 ],
+                "LevelPath" : "res/levels/level 1.json",
                 "Index" : 0
             },
             {
-                "Pos" : [ 1360, 176 ],
-                "LevelPath" : "res/levels/bosslevel.json",
+                "Pos" : [ 1220, 176 ],
+                "LevelPath" : "res/levels/level 1.json",
                 "Index" : 0
             },
             {
-                "Pos" : [ 1360, 192 ],
-                "LevelPath" : "res/levels/bosslevel.json",
+                "Pos" : [ 1220, 192 ],
+                "LevelPath" : "res/levels/level 1.json",
                 "Index" : 0
             }
         ],
         "FromLevel": [
             [
-                1296,
+                1188,
                 192
             ]
         ],

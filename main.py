@@ -16,7 +16,7 @@ def main():
     clock = pygame.time.Clock()
     fps = 60
 
-    screenManager = ScreenManager(TextScreen("res/levels/texttest.json"))
+    screenManager = ScreenManager(Level("res/levels/level 0.json"))#TextScreen("res/levels/texttest.json"))
     
     running = True
     while running:
@@ -33,7 +33,7 @@ def main():
 
         screenManager.update(delta)
 
-        win.fill((200,200,200))
+        win.fill((0,0,0))
 
         screenManager.draw(win)
 

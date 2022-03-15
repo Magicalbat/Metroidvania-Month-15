@@ -65,7 +65,7 @@ class EnemyManager:
             pygame.draw.rect(win, (0,200,50), (r.centerx-scroll.x-w*0.5, r.y-scroll.y, w, 5))
             pygame.draw.circle(win, (255,50,50), (r.x-scroll.x+r.w*0.5, r.y-scroll.y+5+r.w*0.5), r.w*0.5)
 
-    def update(self, delta, tilemap, player, screenRect, playerSpawn=(0,0)):
+    def update(self, delta, tilemap, player, screenRect, playerSpawn=(0,0), colRects=None):
         if self.boss is not None:
             self.boss.update(delta, tilemap, player)
             if self.boss.spawnEnemy:
@@ -125,7 +125,7 @@ class EnemyManager:
 
         for enemy in self.enemies:
             enemy.onScreen = enemy.rect.colliderect(screenRect)
-            enemy.update(delta, player, tilemap)
+            enemy.update(delta, player, tilemap, colRects)
 
         for i in range(len(self.enemies))[::-1]:
             if self.enemies[i].onScreen:#screenRect.colliderect(self.enemies[i].rect):
