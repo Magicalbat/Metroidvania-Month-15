@@ -79,6 +79,7 @@ class Player(Entity):
         if pickup == "Acid":
             self.hasAcid = True
             self.displayText("Press A to toggle between water and acid")
+            self.displayText("Acid can deal damage to enemies", 8)
         elif pickup == "Kick":
             self.hasKick = True
             self.displayText("Press Z to kick")
